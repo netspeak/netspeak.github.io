@@ -109,7 +109,7 @@ if(corpus.isDefault&&corpora.default===void 0)corpora.default=corpus.key;delete 
 	 *
 	 * @readonly
 	 * @type {string}
-	 */static get defaultBaseUrl(){return"https://temir6.informatik.uni-leipzig.de:8081/netspeak3-server2/"}/**
+	 */static get defaultBaseUrl(){return"https://api.netspeak.org/netspeak4/"}/**
 	 * The default corpus specified by the Netspeak API.
 	 *
 	 * @readonly
