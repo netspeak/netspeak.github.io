@@ -26,7 +26,8 @@ define(["exports","require","./event-system.js"],function(_exports,_require,_eve
 		 */function isValid(l){if(!l)return!1;if(!NetspeakNavigator.supportedLanguages.includes(l))return!1;return!0}// lang search parameter of the URL
 let lang=(new URL(location.href).searchParams.get("lang")||"").toLowerCase();if(isValid(lang))return lang;// lang attribute of the html tag
 lang=(document.documentElement.getAttribute("lang")||"").toLowerCase();if(isValid(lang))return lang;// match against users languages
-for(let l of navigator.languages){l=l.toLowerCase();if(isValid(l))return l}// return default language
+for(let l of navigator.languages){l=l.toLowerCase();if(isValid(l))return l;// reduce e.g. "en-US" to "en"
+l=(/^(\w+)-\w+$/.exec(l)||[])[1];if(isValid(l))return l}// return default language
 return NetspeakNavigator.defaultLanguage}/**
 	 * The current page.
 	 *
