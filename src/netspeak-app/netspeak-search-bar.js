@@ -1,4 +1,4 @@
-define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./netspeak.js","./char-noir.js","./util.js"],function(_exports,_polymerElement,_netspeak,_charNoir,_util){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.PhraseFormatter=_exports.NetspeakSearchBar=void 0;/**
+define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./netspeak.js","./snippets.js","./util.js"],function(_exports,_polymerElement,_netspeak,_snippets,_util){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.PhraseFormatter=_exports.NetspeakSearchBar=void 0;/**
  * @typedef QueryPhrasesOptions
  * @property {"append" | "overwrite"} [options.appendMode="overwrite"] How the queried phrases will be integrated into the existing ones. "append": All of the new phrases will be added. "overwrite": All already queried phrases will be removed and the newly queried will be added.
  * @property {number} [options.topk=this.initialLimit] The maximum number of phrases queried.
@@ -432,8 +432,8 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
 	 */get netspeakApi(){return this._netspeakApi}/**
 	 * The client used to query data provided by the ChatNoir API.
 	 *
-	 * @type {ChatNoir}
-	 */get charNoirApi(){return this._charNoirApi}/**
+	 * @type {Snippets}
+	 */get snippetsApi(){return this._snippetsApi}/**
 	 * The phrase formatter used.
 	 *
 	 * @type {PhraseFormatter}
@@ -447,8 +447,7 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
 	 */get history(){if(!this._history)this._history=[];const limit=1024;if(this._history.length>limit)this._history.splice(0,this._history.length-limit);return this._history}/**
 	 * Creates a new instance of NetspeakSearchBar.
 	 *
-	 */constructor(){super();this._connected=!1;this._netspeakApi=new _netspeak.Netspeak;this._charNoirApi=new _charNoir.ChatNoir("d07546d8-e437-4b04-aad3-2957013ee232");// TODO: find a better way to store the api key
-this._pinnedPhrases=new _netspeak.PhraseCollection;this._queriedPhrases=new _netspeak.PhraseCollection;// for typing purposes
+	 */constructor(){super();this._connected=!1;this._netspeakApi=new _netspeak.Netspeak;this._snippetsApi=new _snippets.Snippets;this._pinnedPhrases=new _netspeak.PhraseCollection;this._queriedPhrases=new _netspeak.PhraseCollection;// for typing purposes
 /** @type {string} */this.query=this.query;/** @type {string} */this.corpus=this.corpus;/** @type {number} */this.initialLimit=this.initialLimit;/** @type {boolean} */this.readonly=this.readonly;/** @type {boolean} */this.slowSearch=this.slowSearch;/** @type {number} */this.initialExamplesLimit=this.initialExamplesLimit;/** @type {boolean} */this.historyHidden=this.historyHidden;// for debugging
 window.bar=this}/**
 	 * The method called after the element was added to the DOM.
@@ -515,7 +514,7 @@ wrapper.style.display=showWrapper?"block":"none";if(focusInput&&this._queryInput
 	 * @param {number} [pageSize]
 	 */_loadExamples(e,text,corpus,page=0,pageSize=this.initialExamplesLimit){// add loading
 (0,_util.appendNewElements)(e,"SPAN.btn-img.loading","SPAN.btn-img");// fetch
-this.charNoirApi.search({query:text,size:pageSize,from:page*pageSize}).then(res=>{this._showExamples(e,{text,corpus,page,pageSize,examples:res.results.map(r=>{const snippet=r.snippet+"...",source=r.target_uri;return{snippet:snippet,source:source}})})})}/**
+this.snippetsApi.search({query:text,size:pageSize,from:page*pageSize}).then(res=>{this._showExamples(e,{text,corpus,page,pageSize,examples:res.results.map(r=>{const snippet=r.snippet+"...",source=r.target_uri;return{snippet:snippet,source:source}})})})}/**
 	 *
 	 * @param {HTMLElement} e
 	 * @param {Examples} examples
