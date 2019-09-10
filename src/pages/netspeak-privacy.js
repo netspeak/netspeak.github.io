@@ -137,4 +137,4 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","./page-styles.js
 		<a href="https://polyfill.io/docs/privacy-policy">https://polyfill.io/docs/privacy-policy</a>
 
 </div>
-		`}}_exports.NetspeakPrivacy=NetspeakPrivacy;window.customElements.define(NetspeakPrivacy.is,NetspeakPrivacy)});
+		`}}_exports.NetspeakPrivacy=NetspeakPrivacy;(0,_netspeakElement.registerElement)(NetspeakPrivacy)});

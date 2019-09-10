@@ -10,7 +10,7 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
  *
  * @customElement
  * @polymer
- */class NetspeakSearchBar extends _polymerElement.PolymerElement{static get is(){return"netspeak-search-bar"}static get properties(){return{query:{type:String,value:"",observer:"_queryChanged"},corpus:{type:String,value:_netspeak.Netspeak.defaultCorpus,observer:"_corpusChanged"},initialLimit:{type:Number,value:20},readonly:{type:Boolean,value:!1},slowSearch:{type:Boolean,value:!1},initialExamplesLimit:{type:Number,value:6},historyHidden:{type:Boolean,value:!1,notify:!0,observer:"_historyHiddenChanged"}}}static get template(){return _polymerElement.html`
+ */class NetspeakSearchBar extends _polymerElement.PolymerElement{static get is(){return"netspeak-search-bar"}static get properties(){return{query:{type:String,value:"",observer:"_queryChanged"},corpus:{type:String,value:_netspeak.Netspeak.defaultCorpus,observer:"_corpusChanged"},initialLimit:{type:Number,value:30},readonly:{type:Boolean,value:!1},slowSearch:{type:Boolean,value:!1},initialExamplesLimit:{type:Number,value:6},historyHidden:{type:Boolean,value:!1,notify:!0,observer:"_historyHiddenChanged"}}}static get template(){return _polymerElement.html`
 		<style>
 			:host {
 				display: block;
@@ -74,6 +74,7 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
 				border-bottom: none;
 				box-shadow: 0 2px 1px 0 rgba(0, 0, 0, 0.2);
 				margin: var(--input-margin, 0 0 .25em 0);
+				font-family: var(--input-font-family, inherit);
 			}
 
 			#box table,
@@ -87,7 +88,8 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
 				box-sizing: border-box;
 				width: 100%;
 				padding: .5em;
-				font-size: 1em;
+				font-family: var(--input-font-family, inherit);
+				font-size: 100%;
 			}
 
 			#box input::-ms-clear {
@@ -132,7 +134,7 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
 			}
 
 			#drop-down .option:nth-child(2n) {
-				background-color: #FAFAFA;
+				background-color: #F8F8F8;
 			}
 
 			#drop-down .option:hover {
@@ -152,6 +154,7 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
 				border-right: var(--result-border-right, 1px solid #BBB);
 				border-bottom: var(--result-border-bottom, 1px solid #BBB);
 				border-left: var(--result-border-left, 1px solid #BBB);
+				font-family: var(--result-font-family, inherit);
 			}
 
 			/*
@@ -184,7 +187,7 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
 			}
 
 			#result-list>div:nth-child(2n) {
-				background-color: #FAFAFA;
+				background-color: #F8F8F8;
 			}
 
 			#result-list>div:hover {

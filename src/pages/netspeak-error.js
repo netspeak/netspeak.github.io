@@ -4,4 +4,4 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","./page-styles.js
 	<h1 id="error">Error:</h1>
 	<p id="message">There seems to be a problem with the site.</p>
 </div>
-		`}}_exports.NetspeakError=NetspeakError;window.customElements.define(NetspeakError.is,NetspeakError)});
+		`}}_exports.NetspeakError=NetspeakError;(0,_netspeakElement.registerElement)(NetspeakError)});

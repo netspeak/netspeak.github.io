@@ -28,4 +28,4 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","./page-styles.js
 	</p>
 
 </div>
-		`}}_exports.NetspeakPublisher=NetspeakPublisher;window.customElements.define(NetspeakPublisher.is,NetspeakPublisher)});
+		`}}_exports.NetspeakPublisher=NetspeakPublisher;(0,_netspeakElement.registerElement)(NetspeakPublisher)});

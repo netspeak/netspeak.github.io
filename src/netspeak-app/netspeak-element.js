@@ -1,7 +1,9 @@
-define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./netspeak-navigator.js"],function(_exports,_polymerElement,_netspeakNavigator){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.loadLocalization=loadLocalization;_exports.htmlR=_exports.html=_exports.NetspeakElement=void 0;/**
+define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./netspeak-navigator.js"],function(_exports,_polymerElement,_netspeakNavigator){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.loadLocalization=loadLocalization;_exports.registerElement=registerElement;_exports.htmlR=_exports.html=_exports.NetspeakElement=void 0;/**
  * @typedef LocalizationJson
  * @property {Object<string, string>} [template]
  * @property {any} [custom]
+ *
+ * @typedef {Function & { is: string }} PolymerConstructor
  */ /**
  * Loads the localization of the current language for the given class.
  *
@@ -9,7 +11,7 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
  *
  * The returned promise will resolve to `false` if the current language is the default language (en).
  *
- * @param {Function} constructor
+ * @param {PolymerConstructor} constructor
  * @returns {Promise<LocalizationJson | false>}
  */function loadLocalization(constructor){let promise=localizationCache.get(constructor);if(!promise){/** @type {string} */const is=constructor.is,meta=constructor.importMeta;/** @type {{ url: string }} */if(meta&&meta.url&&is){const currentLang=_netspeakNavigator.NetspeakNavigator.currentLanguage;if(currentLang==_netspeakNavigator.NetspeakNavigator.defaultLanguage){promise=Promise.resolve(!1)}else{const url=new URL(meta.url);url.hash=url.search="";const dir=url.pathname.replace(/\/[^/]*$/,"");url.pathname=`${dir}/locales/${is}.${currentLang}.json`;promise=fetch(url.href).then(resp=>resp.json())}}else if(!is){promise=Promise.reject(`No 'is' property on ${constructor.name}`)}else{promise=Promise.reject(`No 'importMeta' property on ${constructor.name} (is: ${is})`)}localizationCache.set(constructor,promise)}return promise}/** @type {Map<Function, Promise<LocalizationJson | false>>} */const localizationCache=new Map;/**
  * A localizable element with support for PrismJS.
@@ -29,4 +31,8 @@ if(0===element.childElementCount){element.textContent=text}}}}}).catch(e=>{/* ig
  *
  * @param {TemplateStringsArray} strings
  * @param {any[]} values
- */_exports.html=html;const htmlR=(strings,...values)=>{/** @type {any} */const newStrings=[...strings.raw];newStrings.raw=strings.raw;return(0,_polymerElement.html)(newStrings,...values)};_exports.htmlR=htmlR});
+ */_exports.html=html;const htmlR=(strings,...values)=>{/** @type {any} */const newStrings=[...strings.raw];newStrings.raw=strings.raw;return(0,_polymerElement.html)(newStrings,...values)};/**
+ *
+ * @param {PolymerConstructor} constructor
+ */_exports.htmlR=htmlR;function registerElement(constructor){window.customElements.define(constructor.is,constructor);// preload localization
+loadLocalization(constructor)}});

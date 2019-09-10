@@ -136,4 +136,4 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","./page-styles.js
 	 *
 	 * @param {string} page The page.
 	 * @returns {string} The URL.
-	 */getPageUrl(page){return _netspeakNavigator.NetspeakNavigator.getPageUrl(page)}}_exports.NetspeakTerms=NetspeakTerms;window.customElements.define(NetspeakTerms.is,NetspeakTerms)});
+	 */getPageUrl(page){return _netspeakNavigator.NetspeakNavigator.getPageUrl(page)}}_exports.NetspeakTerms=NetspeakTerms;(0,_netspeakElement.registerElement)(NetspeakTerms)});

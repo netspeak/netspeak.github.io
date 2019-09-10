@@ -223,4 +223,4 @@ this.writeHistory()}else{sessionStorage.setItem("history",json)}}/**
 	 * @param {string} query The query.
 	 * @param {string} [corpus="web-en"] The corpus.
 	 * @returns {string} The URL.
-	 */getQueryUrl(query,corpus="web-en"){let href=location.href,hash=_netspeakNavigator.UrlUtil.getHash(href,"");hash=_netspeakNavigator.HashUtil.setPage(hash,"");hash=_netspeakNavigator.HashUtil.setParameter(hash,"corpus",corpus);hash=_netspeakNavigator.HashUtil.setParameter(hash,"q",query);href=_netspeakNavigator.UrlUtil.setHash(href,hash);return href}}_exports.NetspeakSearch=NetspeakSearch;window.customElements.define(NetspeakSearch.is,NetspeakSearch)});
+	 */getQueryUrl(query,corpus="web-en"){let href=location.href,hash=_netspeakNavigator.UrlUtil.getHash(href,"");hash=_netspeakNavigator.HashUtil.setPage(hash,"");hash=_netspeakNavigator.HashUtil.setParameter(hash,"corpus",corpus);hash=_netspeakNavigator.HashUtil.setParameter(hash,"q",query);href=_netspeakNavigator.UrlUtil.setHash(href,hash);return href}}_exports.NetspeakSearch=NetspeakSearch;(0,_netspeakElement.registerElement)(NetspeakSearch)});

@@ -68,4 +68,4 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","./page-styles.js
 </div>
 
 </div>
-`}}_exports.NetspeakExamples=NetspeakExamples;window.customElements.define(NetspeakExamples.is,NetspeakExamples)});
+`}}_exports.NetspeakExamples=NetspeakExamples;(0,_netspeakElement.registerElement)(NetspeakExamples)});

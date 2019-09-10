@@ -443,4 +443,4 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","./page-styles.js
 }`}</code></pre>
 
 </div>
-		`}}_exports.NetspeakDeveloper=NetspeakDeveloper;window.customElements.define(NetspeakDeveloper.is,NetspeakDeveloper)});
+		`}}_exports.NetspeakDeveloper=NetspeakDeveloper;(0,_netspeakElement.registerElement)(NetspeakDeveloper)});
