@@ -929,22 +929,22 @@ define(["exports", "./netspeak-element.js", "./netspeak.js", "./snippets.js", ".
 			}
 
 
-			#result-list div.options .example {
-				font-size: 80%;
+			#result-list div.options .examples-list {
+				font-size: 90%;
 				word-break: break-word;
 			}
 
-			#result-list div.options .example em {
+			#result-list div.options .examples-list em {
 				font-weight: bold;
 			}
 
-			#result-list div.options .example a {
+			#result-list div.options .examples-list a {
 				color: inherit;
 				opacity: .7;
 				padding: 0 .5em;
 			}
 
-			#result-list div.options .example a::after {
+			#result-list div.options .examples-list a::after {
 				content: "\\21F1";
 				display: inline-block;
 				transform: rotate(90deg);
@@ -1185,7 +1185,7 @@ define(["exports", "./netspeak-element.js", "./netspeak.js", "./snippets.js", ".
       const options = (0, _util.appendNewElements)(element, "DIV.options"); // examples
 
       const examplesContainer = (0, _util.appendNewElements)(options, "DIV.examples-container");
-      (0, _util.appendNewElements)(examplesContainer, "div.examples");
+      const examplesList = (0, _util.appendNewElements)(examplesContainer, "div.examples-list");
       const loadMoreExamplesContainer = (0, _util.appendNewElements)(examplesContainer, "div.load-more-examples"); // loading icon
 
       const loadingIcon = (0, _util.appendNewElements)(loadMoreExamplesContainer, "SPAN.btn-img.loading");
@@ -1205,14 +1205,15 @@ define(["exports", "./netspeak-element.js", "./netspeak.js", "./snippets.js", ".
           button.style.display = null;
 
           for (const example of examples) {
-            const p = (0, _util.appendNewElements)(examplesContainer, "DIV", "P");
+            const p = (0, _util.appendNewElements)(examplesList, "DIV", "P");
             p.innerHTML = example.snippet;
             (0, _util.appendNewElements)(p, "A").setAttribute("href", example.source);
           }
-        }).catch(() => {
+        }).catch(e => {
+          console.error(e);
           loadingIcon.style.display = "none";
           button.style.display = "none";
-          const p = (0, _util.appendNewElements)(examplesContainer, "DIV", "P");
+          const p = (0, _util.appendNewElements)(examplesList, "DIV", "P");
           p.textContent = "Failed to load examples.";
         });
       } // load examples right now.
@@ -1238,7 +1239,7 @@ define(["exports", "./netspeak-element.js", "./netspeak.js", "./snippets.js", ".
 
       const snippetsBuffer = [];
       let internalPage = 0;
-      let internalPageSize = pageSize * 2;
+      let internalPageSize = 100;
       const snippetsApi = this.snippetsApi;
       /**
        * @returns {Promise<Snippet[]>}
@@ -1260,16 +1261,15 @@ define(["exports", "./netspeak-element.js", "./netspeak.js", "./snippets.js", ".
               snippet,
               target_uri
             } = _ref;
-            const text = (0, _util.textContent)(snippet).toLowerCase(); // The basic idea behind this id is that most duplicate examples are equal character for character,
+            const text = (0, _util.textContent)(snippet).toLowerCase();
+            if (text.indexOf(phrase.text.toLowerCase()) === -1) continue; // The basic idea behind this id is that most duplicate examples are equal character for character,
             // so a simple (and fast) hash lookup is sufficient.
             // To also filter duplicates which are technically different but don't look very different to
             // humans, some additional transformation are performed.
 
-            const id = text.replace(/\d+/g, "0"); // To be added to the buffer, the queried snippet has to both:
-            //  1) contain the phrase text,
-            //  2) not be a duplicate of a previous example.
+            const id = text.replace(/\d+/g, "0"); // To be added to the buffer, the queried snippet has to not be a duplicate of a previous example.
 
-            if (text.includes(phrase.text.toLowerCase()) && !pastExamples.has(id)) {
+            if (!pastExamples.has(id)) {
               pastExamples.add(id);
               snippetsBuffer.push({
                 snippet: snippet + "...",
