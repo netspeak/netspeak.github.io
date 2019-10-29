@@ -1253,7 +1253,7 @@ define(["exports", "./netspeak-element.js", "./netspeak.js", "./snippets.js", ".
         return snippetsApi.search({
           query: phrase.text,
           size: internalPageSize,
-          from: internalPageSize * internalPage
+          from: internalPageSize * internalPage++
         }).then(res => {
           for (const _ref of res.results) {
             const {
