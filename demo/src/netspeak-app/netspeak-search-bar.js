@@ -1223,17 +1223,17 @@ define(["exports", "./netspeak-element.js", "./netspeak.js", "./snippets.js", ".
       return options;
     }
     /**
-     * Returns a function which will return a new page of example every time it is invoked.
+     * Returns a function which will return a new examples every time it is invoked.
      *
      * @param {Phrase} phrase
-     * @param {number} pageSize
+     * @param {number} requestCount
      * @returns {() => Promise<Snippet[]>}
      *
      * @typedef {{ snippet: string; source: string }} Snippet
      */
 
 
-    _createExampleSupplier(phrase, pageSize) {
+    _createExampleSupplier(phrase, requestCount) {
       const pastExamples = new Set([""]);
       /** @type {Snippet[]} */
 
@@ -1241,13 +1241,21 @@ define(["exports", "./netspeak-element.js", "./netspeak.js", "./snippets.js", ".
       let internalPage = 0;
       let internalPageSize = 100;
       const snippetsApi = this.snippetsApi;
+      let startTime = -1;
+      const timeout = 5000; // ms
+
       /**
        * @returns {Promise<Snippet[]>}
        */
 
       function loadSnippets() {
-        if (snippetsBuffer.length >= pageSize) {
-          return Promise.resolve(snippetsBuffer.splice(0, pageSize));
+        if (snippetsBuffer.length >= requestCount) {
+          return Promise.resolve(snippetsBuffer.splice(0, requestCount));
+        }
+
+        if (snippetsBuffer.length > 0 && new Date().valueOf() - startTime > timeout) {
+          // return all of them early if we take too long
+          return Promise.resolve(snippetsBuffer.splice(0, snippetsBuffer.length));
         } // load and buffer snippets
 
 
@@ -1282,7 +1290,10 @@ define(["exports", "./netspeak-element.js", "./netspeak.js", "./snippets.js", ".
         });
       }
 
-      return loadSnippets;
+      return () => {
+        startTime = new Date().valueOf();
+        return loadSnippets();
+      };
     }
     /**
      * @param {HTMLElement} element
