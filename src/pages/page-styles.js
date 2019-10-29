@@ -2,7 +2,6 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js"],func
 <style>
 	div.article {
 		padding: 3em 1em;
-		font-size: 14px;
 	}
 
 	/*
@@ -117,14 +116,6 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js"],func
 
 
 	/*
-	 * SEARCH BAR
-	 */
-
-	netspeak-search-bar {
-		font-size: medium;
-	}
-
-	/*
 	 * CODE
 	 */
 
@@ -137,7 +128,7 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js"],func
 		word-break: normal;
 		word-wrap: normal;
 		line-height: 1.5;
-		font-size: 13px;
+		font-size: 90%;
 
 		-moz-tab-size: 4;
 		-o-tab-size: 4;

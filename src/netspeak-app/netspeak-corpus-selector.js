@@ -1,4 +1,4 @@
-define(["exports","meta","../../node_modules/@polymer/polymer/polymer-element.js","./netspeak-element.js","./netspeak.js"],function(_exports,meta,_polymerElement,_netspeakElement,_netspeak){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.LabelProvider=_exports.NetspeakCorpusSelector=void 0;meta=babelHelpers.interopRequireWildcard(meta);class NetspeakCorpusSelector extends _polymerElement.PolymerElement{static get importMeta(){return meta}static get is(){return"netspeak-corpus-selector"}static get properties(){return{value:{type:String,notify:!0,value:"web-en",observer:"_valueChange"}}}static get template(){return _polymerElement.html`
+define(["exports","meta","./netspeak-element.js","./netspeak.js"],function(_exports,meta,_netspeakElement,_netspeak){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.LabelProvider=_exports.NetspeakCorpusSelector=void 0;meta=babelHelpers.interopRequireWildcard(meta);class NetspeakCorpusSelector extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-corpus-selector"}static get properties(){return{value:{type:String,notify:!0,value:"web-en",observer:"_valueChange"}}}static get template(){return _netspeakElement.html`
 		<style>
 			:host {
 				display: table;
@@ -77,4 +77,4 @@ return`<span id="${id}"></span>`}/**
 	 * Returns the default LabelProvider used by the NetspeakCorpusSelector.
 	 *
 	 * @returns {LabelProvider} A label provider.
-	 */static getDefault(){return defaultLabelProvide}}_exports.LabelProvider=LabelProvider;const defaultLabelProvide=new LabelProvider;window.customElements.define(NetspeakCorpusSelector.is,NetspeakCorpusSelector)});
+	 */static getDefault(){return defaultLabelProvide}}_exports.LabelProvider=LabelProvider;const defaultLabelProvide=new LabelProvider;(0,_netspeakElement.registerElement)(NetspeakCorpusSelector)});

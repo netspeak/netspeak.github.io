@@ -114,7 +114,9 @@ if(corpus.isDefault&&corpora.default===void 0)corpora.default=corpus.key;delete 
 	 *
 	 * @readonly
 	 * @type {string}
-	 */static get defaultCorpus(){return"web-en"}}_exports.Netspeak=Netspeak;class Word{/**
+	 */static get defaultCorpus(){return"web-en"}/**
+	 * @returns {Netspeak}
+	 */static getInstance(){return defaultNetspeakInstance=defaultNetspeakInstance||new Netspeak}}_exports.Netspeak=Netspeak;let defaultNetspeakInstance;class Word{/**
 	 * @param {string} text The text of the word.
 	 * @param {number} [type=Word.Types.WORD] The type of operator the word matches.
 	 */constructor(text,type=Word.Types.WORD){this.text=text;this.type=type}/**
@@ -132,11 +134,11 @@ if(corpus.isDefault&&corpora.default===void 0)corpora.default=corpus.key;delete 
  */class Phrase{/**
 	 * Creates an instance of Phrase.
 	 *
-	 * @param {Word[]} words The array of words creating the phrase.
+	 * @param {readonly Word[]} words The array of words creating the phrase.
 	 * @param {number} frequency The absolute frequency of the phrase.
-	 * @param {string} [query] The query this phase matches.
-	 * @param {string} [corpus] The corpus from which the phrases where retrieved.
-	 */constructor(words,frequency,query=void 0,corpus=void 0){this.words=words;this.text=0==words.length?"":words.map(w=>w.text||"").join(" ");this.frequency=frequency;this.query=query;this.corpus=corpus}}/**
+	 * @param {string} query The query this phase matches.
+	 * @param {string} corpus The corpus from which the phrases where retrieved.
+	 */constructor(words,frequency,query,corpus){this.words=words;this.text=words.map(w=>w.text||"").join(" ");this.frequency=frequency;this.query=query;this.corpus=corpus;this.id=this.corpus+"\n"+this.text}}/**
  * A collection of phrases.
  *
  * A phrase is identified by its text.
@@ -153,11 +155,6 @@ if(corpus.isDefault&&corpora.default===void 0)corpora.default=corpus.key;delete 
 	 * @param {Phrase[]} phrases The phrases of the collection.
 	 * @returns {PhraseCollection} The collection.
 	 */static from(phrases){let c=new PhraseCollection;c.addAll(phrases);return c}/**
-	 * Creates a new PhraseCollection of the given phrases.
-	 *
-	 * @param {Phrase[]} phrases The phrases of the collection.
-	 * @returns {PhraseCollection} The collection.
-	 */static of(...phrases){let c=new PhraseCollection;c.addAll(phrases);return c}/**
 	 * Returns the number of phrases in the collection.
 	 *
 	 * @readonly
@@ -180,7 +177,7 @@ if(corpus.isDefault&&corpora.default===void 0)corpora.default=corpus.key;delete 
 	 * @type {number}
 	 */get totalFrequency(){if(this._total===void 0){this._total=0;const added={},isAdded=(words=[])=>{const len=words.length;if(0==len)return!1;// check for all subsets of words
 for(let count=1;count<=len;count++){for(let offset=0,sub;offset<=len-count;offset++){sub=1==count?words[offset]:words.slice(offset,offset+count).join(" ");if(sub in added)return!0}}// not added
-added[words.join(" ")]=!0;return!1};for(let i=0;i<this.length;i++){const p=this.at(i);if(!isAdded(p.words.map(w=>w.text||"")))this._total+=p.frequency}}return this._total}set totalFrequency(value){if(value===void 0)this._total=void 0}_getSorted(){if(this._modified){this._array.sort((a,b)=>b.frequency-a.frequency);this._modified=!1}return this._array}_modify(){this._modified=!0;this._total=void 0}/**
+added[words.join(" ")]=!0;return!1};for(let i=0;i<this.length;i++){const p=this.at(i);if(!isAdded(p.words.map(w=>w.text||"")))this._total+=p.frequency}}return this._total}_getSorted(){if(this._modified){this._array.sort((a,b)=>b.frequency-a.frequency);this._modified=!1}return this._array}_modify(){this._modified=!0;this._total=void 0}/**
 	 * Adds the given phrases to the collection.
 	 *
 	 * @param {Phrase[]} phrases The phrases.

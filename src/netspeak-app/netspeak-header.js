@@ -1,9 +1,8 @@
-define(["meta","./netspeak-element.js","./netspeak-navigator.js","./util.js"],function(meta,_netspeakElement,_netspeakNavigator,_util){"use strict";meta=babelHelpers.interopRequireWildcard(meta);class NetspeakHeader extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-header"}static get properties(){return{}}static get template(){return _netspeakElement.html`
+define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,_netspeakElement,_netspeakNavigator){"use strict";meta=babelHelpers.interopRequireWildcard(meta);class NetspeakHeader extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-header"}static get properties(){return{}}static get template(){return _netspeakElement.html`
 		<style>
 			:host {
 				background: #323232;
 				display: block;
-				height: 64px;
 				padding: 0;
 				border-bottom: 1px solid #727272;
 				position: relative;
@@ -11,7 +10,7 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js","./util.js"],fu
 
 			#content {
 				max-width: 800px;
-				padding: 16px;
+				padding: 8px 16px;
 				box-sizing: border-box;
 				margin: 0 auto;
 			}
@@ -64,7 +63,7 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js","./util.js"],fu
 		</style>
 
 		<div id="content">
-			<a href="[[getStartUrl()]]" id="logo" on-click="_clearSearchBar"></a>
+			<a href="[[getStartUrl()]]" id="logo"></a>
 			<span id="slogan">
 				One word leads to another.
 			</span>
@@ -74,4 +73,4 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js","./util.js"],fu
 	 * Returns the URL of the start page.
 	 *
 	 * @returns {string} The URL.
-	 */getStartUrl(){return _netspeakNavigator.NetspeakNavigator.getPageUrl("")}_clearSearchBar(){/** @type {import("../pages/netspeak-search").NetspeakSearch} */const search=(0,_util.shadyQuerySelector)(window.document,"netspeak-search");if(!search||!search.searchBar)return;search.searchBar.clear()}}(0,_netspeakElement.registerElement)(NetspeakHeader)});
+	 */getStartUrl(){return _netspeakNavigator.NetspeakNavigator.getPageUrl("index")}}(0,_netspeakElement.registerElement)(NetspeakHeader)});

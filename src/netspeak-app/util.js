@@ -1,4 +1,9 @@
-define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.shadyQuerySelectorAll=shadyQuerySelectorAll;_exports.shadyQuerySelector=shadyQuerySelector;_exports.debounce=debounce;_exports.textContent=textContent;_exports.regularTagNames=void 0;/**
+define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;/**
+ *
+ * @param {T | T[]} value
+ * @returns {T[]}
+ * @template T
+ */function toArray(value){if(Array.isArray(value)){return value}else{return[value]}}/**
  * Creates phrase new HTML element matching the given selector.
  *
  * Supported features are tag names, ids, classes and attributes of the form `[attribute-name]`, `[attribute-name=value]` and `[attribute-name="value"]`
@@ -16,24 +21,28 @@ const id=selector.match(/#([\w-]+)/),classes=selector.match(/\.[\w-]+/g),e=docum
  * @param {string[]} selectors The selectors describing the elements to create.
  * @returns {HTMLElement} The element created last of the parent if no elements were created.
  */function appendNewElements(parent,...selectors){let e=parent;for(let i=0;i<selectors.length;i++)e=e.appendChild(newElement(selectors[i]));return e}/**
- * Queries all children of the given element matching the given selector.
  *
- * @param {ParentNode} element The parent HTML element.
- * @param {string} selector The selector.
- * @returns {Element[]} The matching elements.
- */function shadyQuerySelectorAll(element,selector){const result=Array.from(element.querySelectorAll(selector));element.querySelectorAll(irregularTagSelector).forEach(e=>{if(e.shadowRoot&&e.shadowRoot.querySelectorAll){result.push(...shadyQuerySelectorAll(e.shadowRoot,selector))}});return result}/**
- * Queries all children of the given element matching the given selector.
+ * @param {Element} parent
+ * @param {AppendNewChildren} children
+ * @returns {Object<string, HTMLElement>}
  *
- * @param {ParentNode} element The parent HTML element.
- * @param {string} selector The selector.
- * @returns {T & Element} The matching element or undefined.
- * @template T
- */function shadyQuerySelector(element,selector){const result=element.querySelector(selector);if(result)return(/** @type {any} */result);for(let e of element.querySelectorAll(irregularTagSelector)){if(e.shadowRoot&&e.shadowRoot.querySelector){const res=shadyQuerySelector(e.shadowRoot,selector);if(res)return res}}return void 0}/**
- * An array of plain old HTML tag names.
+ * @typedef {AppendNewChild | AppendNewChild[]} AppendNewChildren
+ * @typedef {string | AppendNewSelectorObject | AppendNewTagObject} AppendNewChild
  *
- * @readonly
- * @type {string[]}
- */const regularTagNames=["style","script","link","div","span","a","h3","h4","h5","h6","br","p","b","i","img","em","strong","button","input","option","table","tr","td","th","ul","ol","li","iframe","th","pre","code"];_exports.regularTagNames=regularTagNames;const irregularTagSelector="*"+regularTagNames.map(e=>":not("+e+")").join("");/**
+ * @typedef AppendNewSelectorObject
+ * @property {string} [out]
+ * @property {string} selector
+ * @property {Object<string, (this: Element, ev: Event) => any>} [listener]
+ * @property {AppendNewChildren} [children]
+ *
+ * @typedef AppendNewTagObject
+ * @property {string} [out]
+ * @property {string} tag
+ * @property {string} [className]
+ * @property {Object<string, string>} [attr]
+ * @property {Object<string, (this: Element, ev: Event) => any>} [listener]
+ * @property {AppendNewChildren} [children]
+ */function appendNew(parent,children){/** @type {Object<string, HTMLElement>} */const outObject={};for(let child of toArray(children)){if("string"===typeof child){child={selector:child}}/** @type {HTMLElement} */let element;if("selector"in child){let selector=child.selector;if(!selector){throw new Error(`Selector cannot be ${selector}`)}const tag=/^[^.#\s<>=$[\]]+/.exec(selector)[0];selector=selector.slice(tag.length);element=document.createElement(tag);let chainParent,chainElement;while(selector){/** @type {RegExpExecArray | null} */let m;if(m=/^\.([^.#\s<>=$[\]]+)/.exec(selector)){element.classList.add(m[1])}else if(m=/^#([^.#\s<>=$[\]]+)/.exec(selector)){element.id=m[1]}else if(m=/^[^.#\s<>=$[\]]+/.exec(selector)){chainParent=chainElement;chainElement=document.createElement(m[0]);if(chainParent){chainParent.appendChild(chainElement)}}else if(m=/^\s+/.exec(selector)){chainParent=chainElement;chainElement=void 0}else{throw new Error(`Cannot parse sub-selector: ${JSON.stringify(selector)}`)}selector=selector.slice(m[0].length)}element=chainElement}else{element=document.createElement(child.tag);if(child.className)element.className=child.className;if(child.attr){for(const key in child.attr){if(child.attr.hasOwnProperty(key)){element.setAttribute(key,child.attr[key])}}}}if("out"in child){outObject[child.out]=element}if("children"in child){Object.assign(outObject,appendNew(element,child.children))}if("listener"in child){for(const key in child.listener){if(child.listener.hasOwnProperty(key)){element.addEventListener(key,child.listener[key])}}}parent.appendChild(element)}return outObject}/**
  * Returns a function, that, as long as it continues to be invoked, will not be triggered.
  * The function will be called after it stops being called for `wait` milliseconds.
  *
@@ -49,5 +58,22 @@ const id=selector.match(/#([\w-]+)/),classes=selector.match(/\.[\w-]+/g),e=docum
  *
  * @param {string} html
  * @returns {string}
- */function textContent(html){// TODO: This is vulnerable to XSS
-const e=document.createElement("DIV");e.innerHTML=html;return e.textContent||""}});
+ */function textContent(html){// copied from PrismJS' markup definition
+html=html.replace(/<\/?(?!\d)[^\s>/=$<%]+(?:\s(?:\s*[^\s>/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/g,"");const div=document.createElement("div");div.innerHTML=html;return div.textContent}/**
+ * Returns a function which will execute the given function only once in the next frame.
+ *
+ * @param {() => void} func
+ * @returns {() => void}
+ */function createNextFrameInvoker(func){let requested=!1;const invoke=()=>{requested=!1;func()};return()=>{if(!requested){requested=!0;if("undefined"===typeof requestAnimationFrame){setTimeout(invoke,16)}else{requestAnimationFrame(invoke)}}}}/**
+ * Queries all children of the given element matching the given selector.
+ *
+ * @param {ParentNode} element The parent HTML element.
+ * @param {string} selector The selector.
+ * @returns {T & Element | null} The matching element or undefined.
+ * @template T
+ */function shadyQuerySelector(element,selector){const result=element.querySelector(selector);if(result)return(/** @type {any} */result);for(let e of element.querySelectorAll(irregularTagSelector)){if(e.shadowRoot&&e.shadowRoot.querySelector){const res=shadyQuerySelector(e.shadowRoot,selector);if(res)return res}}return null}/**
+ * An array of plain old HTML tag names.
+ *
+ * @readonly
+ * @type {string[]}
+ */const regularTagNames=["style","script","link","div","span","a","h3","h4","h5","h6","br","p","b","i","img","em","strong","button","input","option","table","tr","td","th","ul","ol","li","iframe","th","pre","code"],irregularTagSelector="*"+regularTagNames.map(e=>":not("+e+")").join("");function startScrollToUrlHash(){/** @type {string | null} */let lastHash=null,lastElement=null;/** @type {HTMLElement | null} */setInterval(()=>{const hash=location.hash.replace(/^#/,"");if(hash!==lastHash||!lastElement){lastElement=null;if(hash){lastElement=shadyQuerySelector(document,"#"+hash);if(lastElement){lastElement.scrollIntoView()}}}lastHash=hash},16)}});

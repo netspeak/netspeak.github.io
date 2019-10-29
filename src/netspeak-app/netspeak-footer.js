@@ -3,7 +3,7 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,
 	:host {
 		display: block;
 		background-color: #F8F8F8;
-		font-size: 80%;
+		font-size: 90%;
 		color: #666;
 		padding: 2em 3em;
 		line-height: 1.4;
@@ -83,16 +83,14 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,
 	</div>
 	<div id="language-section">
 		<span class="pipe">|</span>
-		<a class$="[[isCurrentLang('de')]]" href$="[[getLangUrl('de')]]"
-			id$="[[registerLang('de')]]">Deutsch</a>
+		<a class$="[[isCurrentLang('de')]]" href$="[[getLangUrl('de')]]">Deutsch</a>
 		<span class="bullet">&bullet;</span>
-		<a class$="[[isCurrentLang('en')]]" href$="[[getLangUrl('en')]]"
-			id$="[[registerLang('en')]]">English</a>
+		<a class$="[[isCurrentLang('en')]]" href$="[[getLangUrl('en')]]">English</a>
 	</div>
 </div>
 
 <div style="clear: both"></div>
-		`}constructor(){super();this.langRegister={};_netspeakNavigator.NetspeakNavigator.addEventListener("urlChange",()=>this.onUrlChange.apply(this))}/**
+		`}/**
 	 * Returns the URL a given page will have.
 	 *
 	 * @param {string} page The page.
@@ -107,15 +105,4 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,
 	 *
 	 * @param {string} lang The language.
 	 * @returns {string} The CSS class string.
-	 */isCurrentLang(lang){return _netspeakNavigator.NetspeakNavigator.currentLanguage==lang?"current-lang":""}/**
-	 * Registers a new language link and returns the id the link should have.
-	 *
-	 * New language links have to be registered here in order to function properly.
-	 *
-	 * @param {string} lang The language.
-	 * @returns The id.
-	 */registerLang(lang){this.langRegister[lang]=!1;return"lang-"+lang}/**
-	 * A listener function for "urlChange"-events.
-	 *
-	 */onUrlChange(){// update the href of registered links
-for(let lang in this.langRegister){if(!this.langRegister[lang]){this.langRegister[lang]=this.shadowRoot.querySelector("#lang-"+lang)}let a=this.langRegister[lang];a.setAttribute("href",this.getLangUrl(lang))}}}(0,_netspeakElement.registerElement)(NetspeakFooter)});
+	 */isCurrentLang(lang){return _netspeakNavigator.NetspeakNavigator.currentLanguage==lang?"current-lang":""}}(0,_netspeakElement.registerElement)(NetspeakFooter)});

@@ -40,9 +40,11 @@ const req=Object.assign({},request);// construct URL
 let url=this.baseUrl;url+="_search?query="+encodeURIComponent(req.query);["index","from","size"].forEach(p=>{if(!(p in req))return;let v=req[p];if(!0===v){url+="&"+p}else if(!1===v){// noop
 }else{url+="&"+p+"="+encodeURIComponent(v+"")}});// fetch data
 let fetched;if(this.caching&&this._cache.contains(url)){// cache hit
-fetched=this._cache.get(url)}else{fetched=fetch(url);if(this.caching){this._cache.add(url,fetched)}}return fetched.then(res=>res.json())}catch(error){return Promise.reject(error)}}/**
+fetched=this._cache.get(url)}else{fetched=fetch(url).then(res=>res.json());if(this.caching){this._cache.add(url,fetched)}}return fetched}catch(error){return Promise.reject(error)}}/**
 	 * The default base URL of the snippets API.
 	 *
 	 * @readonly
 	 * @type {string}
-	 */static get defaultBaseUrl(){return"https://snippets.netspeak.org/"}}_exports.Snippets=Snippets});
+	 */static get defaultBaseUrl(){return"https://snippets.netspeak.org/"}/**
+	 * @returns {Snippets}
+	 */static getInstance(){return defaultSnippetsInstance=defaultSnippetsInstance||new Snippets}}_exports.Snippets=Snippets;let defaultSnippetsInstance});
