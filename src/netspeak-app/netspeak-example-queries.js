@@ -15,8 +15,8 @@ order:"{ mehr zeig mir }",gap:"M?t zur L\xFC...e"}},defaultCorpus="web-en";/**
 
 			#info {
 				background-color: #F8F8F8;
-				border: 1px solid #BBB;
-				box-shadow: 0 2px 1px 0 rgba(0, 0, 0, 0.2);
+				border: 1px var(--border-color);
+				border-style: none var(--left-right-border-style) solid var(--left-right-border-style);
 				clear: both;
 				position: relative;
 			}
@@ -76,10 +76,6 @@ order:"{ mehr zeig mir }",gap:"M?t zur L\xFC...e"}},defaultCorpus="web-en";/**
 					float: none;
 					display: block;
 					width: auto;
-				}
-
-				.explanation>* {
-					padding-left: .5em;
 				}
 
 			}

@@ -1,4 +1,4 @@
-define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;/**
+define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;_exports.startClickableSearchBars=startClickableSearchBars;/**
  *
  * @param {T | T[]} value
  * @returns {T[]}
@@ -72,8 +72,18 @@ html=html.replace(/<\/?(?!\d)[^\s>/=$<%]+(?:\s(?:\s*[^\s>/=]+(?:\s*=\s*(?:"[^"]*
  * @returns {T & Element | null} The matching element or undefined.
  * @template T
  */function shadyQuerySelector(element,selector){const result=element.querySelector(selector);if(result)return(/** @type {any} */result);for(let e of element.querySelectorAll(irregularTagSelector)){if(e.shadowRoot&&e.shadowRoot.querySelector){const res=shadyQuerySelector(e.shadowRoot,selector);if(res)return res}}return null}/**
+ * Queries all children of the given element matching the given selector.
+ *
+ * @param {ParentNode} element The parent HTML element.
+ * @param {string} selector The selector.
+ * @returns {(T & Element)[]} The matching elements.
+ * @template T
+ */function shadyQuerySelectorAll(element,selector){const result=Array.from(element.querySelectorAll(selector));element.querySelectorAll(irregularTagSelector).forEach(e=>{if(e.shadowRoot&&e.shadowRoot.querySelectorAll){result.push(...shadyQuerySelectorAll(e.shadowRoot,selector))}});// @ts-ignore
+return result}/**
  * An array of plain old HTML tag names.
  *
  * @readonly
  * @type {string[]}
- */const regularTagNames=["style","script","link","div","span","a","h3","h4","h5","h6","br","p","b","i","img","em","strong","button","input","option","table","tr","td","th","ul","ol","li","iframe","th","pre","code"],irregularTagSelector="*"+regularTagNames.map(e=>":not("+e+")").join("");function startScrollToUrlHash(){/** @type {string | null} */let lastHash=null,lastElement=null;/** @type {HTMLElement | null} */setInterval(()=>{const hash=location.hash.replace(/^#/,"");if(hash!==lastHash||!lastElement){lastElement=null;if(hash){lastElement=shadyQuerySelector(document,"#"+hash);if(lastElement){lastElement.scrollIntoView()}}}lastHash=hash},16)}});
+ */const regularTagNames=["style","script","link","div","span","a","h3","h4","h5","h6","br","p","b","i","img","em","strong","button","input","option","table","tr","td","th","ul","ol","li","iframe","th","pre","code"],irregularTagSelector="*"+regularTagNames.map(e=>":not("+e+")").join("");function startScrollToUrlHash(){/** @type {string | null} */let lastHash=null,lastElement=null;/** @type {HTMLElement | null} */setInterval(()=>{const hash=location.hash.replace(/^#/,"");if(hash!==lastHash||!lastElement){lastElement=null;if(hash){lastElement=shadyQuerySelector(document,"#"+hash);if(lastElement){lastElement.scrollIntoView()}}}lastHash=hash},16)}let clickableStarted=!1;/**
+ * Starts a process which will set all Netspeak search bars to clickable (mobile mode) depending on the page size.
+ */function startClickableSearchBars(){function updateClickablity(){const clickableItems=500>=window.innerWidth,searchBars=shadyQuerySelectorAll(document,"netspeak-search-bar");/** @type {import("./netspeak-search-bar").NetspeakSearchBar[]} */for(const searchBar of searchBars){searchBar.clickableItems=clickableItems}}updateClickablity();if(clickableStarted)return;clickableStarted=!0;window.addEventListener("resize",updateClickablity)}});

@@ -55,13 +55,17 @@ define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./uti
 	</style>
 `;/**
  * The Netspeak search bar can query and display phrases queried using the Netspeak API.
- */class NetspeakSearchBar extends _netspeakElement.NetspeakElement{static get is(){return"netspeak-search-bar"}static get properties(){return{query:{type:String,value:"",observer:"_queryChanged"},corpus:{type:String,value:_netspeak.Netspeak.defaultCorpus,notify:!0},initialLimit:{type:Number,value:40},readonly:{type:Boolean,value:!1},slowSearch:{type:Boolean,value:!1},initialExamplesLimit:{type:Number,value:6},historyHidden:{type:Boolean,value:!1,notify:!0,observer:"_historyHiddenChanged"},infoVisibleByDefault:{type:Boolean,value:!1,notify:!0}}}static get template(){return _netspeakElement.html`
+ */class NetspeakSearchBar extends _netspeakElement.NetspeakElement{static get is(){return"netspeak-search-bar"}static get properties(){return{query:{type:String,value:"",observer:"_queryChanged"},corpus:{type:String,value:_netspeak.Netspeak.defaultCorpus,notify:!0},initialLimit:{type:Number,value:40},readonly:{type:Boolean,value:!1},slowSearch:{type:Boolean,value:!1},initialExamplesLimit:{type:Number,value:6},historyHidden:{type:Boolean,value:!1,notify:!0,observer:"_historyHiddenChanged"},infoVisibleByDefault:{type:Boolean,value:!1,notify:!0},clickableItems:{type:Boolean,value:!1,notify:!0}}}static get template(){return _netspeakElement.html`
 		${sharedStyles}
 
 		<style>
 			:host {
 				display: block;
 				font-size: 1em;
+
+				--border-color: #BBB;
+				--left-right-padding: 0;
+				--left-right-border-style: solid;
 			}
 
 			/*
@@ -70,9 +74,9 @@ define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./uti
 
 			#box {
 				display: block;
-				border: 1px solid #BBB;
-				border-bottom: none;
-				box-shadow: 0 2px 1px 0 rgba(0, 0, 0, 0.2);
+				padding: 0 var(--left-right-padding);
+				border: 1px var(--border-color);
+				border-style: solid var(--left-right-border-style);
 				font-family: var(--input-font-family, inherit);
 			}
 
@@ -117,13 +121,11 @@ define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./uti
 			 * DROP DOWN
 			 */
 
-			#drop-down-positioner {}
-
 			#drop-down {
 				position: absolute;
 				background-color: white;
 				box-shadow: 0 2px 1px 0 rgba(0, 0, 0, 0.2);
-				border: 1px solid #BBB;
+				border: 1px solid var(--border-color);
 				width: 15em;
 				margin-left: -15em;
 				z-index: 10;
@@ -132,7 +134,7 @@ define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./uti
 
 			#drop-down .option {
 				padding: .5em 1em;
-				border-bottom: 1px solid #BBB;
+				border-bottom: 1px solid var(--border-color);
 				cursor: pointer;
 			}
 
@@ -153,12 +155,9 @@ define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./uti
 			 */
 
 			#result-wrapper {
-				border-top: var(--result-border-top, 1px solid #BBB);
-				border-right: var(--result-border-right, 1px solid #BBB);
-				border-bottom: var(--result-border-bottom, 1px solid #BBB);
-				border-left: var(--result-border-left, 1px solid #BBB);
+				border: 1px var(--border-color);
+				border-style: none var(--left-right-border-style) solid var(--left-right-border-style);
 				font-family: var(--result-font-family, inherit);
-				margin-top: .25em;
 			}
 
 			/*
@@ -242,7 +241,7 @@ define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./uti
 	 * Creates a new instance of NetspeakSearchBar.
 	 *
 	 */constructor(){super();this.netspeakApi=_netspeak.Netspeak.getInstance();this._queriedPhrases=new _netspeak.PhraseCollection;// for typing purposes
-/** @type {string} */this.query=this.query;/** @type {string} */this.corpus=this.corpus;/** @type {number} */this.initialLimit=this.initialLimit;/** @type {boolean} */this.readonly=this.readonly;/** @type {boolean} */this.slowSearch=this.slowSearch;/** @type {number} */this.initialExamplesLimit=this.initialExamplesLimit;/** @type {boolean} */this.historyHidden=this.historyHidden;/** @type {boolean} */this.infoVisibleByDefault=this.infoVisibleByDefault}/**
+/** @type {string} */this.query=this.query;/** @type {string} */this.corpus=this.corpus;/** @type {number} */this.initialLimit=this.initialLimit;/** @type {boolean} */this.readonly=this.readonly;/** @type {boolean} */this.slowSearch=this.slowSearch;/** @type {number} */this.initialExamplesLimit=this.initialExamplesLimit;/** @type {boolean} */this.historyHidden=this.historyHidden;/** @type {boolean} */this.infoVisibleByDefault=this.infoVisibleByDefault;/** @type {boolean} */this.clickableItems=this.clickableItems;this.addEventListener("clickable-items-changed",()=>{if(this._resultList){this._resultList.clickableItems=this.clickableItems}})}/**
 	 * The method called after the element was added to the DOM.
 	 */connectedCallback(){super.connectedCallback();/** @type {HTMLInputElement} */this._queryInputElement=this.shadowRoot.querySelector("#query-input");/** @type {HTMLButtonElement} */this._exampleQueriesButton=this.shadowRoot.querySelector("#example-queries-button");/** @type {HTMLButtonElement} */this._clearButton=this.shadowRoot.querySelector("#clear-button");/** @type {HTMLButtonElement} */this._historyButton=this.shadowRoot.querySelector("#history-button");/** @type {import("./netspeak-example-queries").NetspeakExampleQueries} */this._exampleQueries=this.shadowRoot.querySelector("netspeak-example-queries");/** @type {NetspeakSearchBarResultList} */this._resultList=this.shadowRoot.querySelector("netspeak-search-bar-result-list");this._historyHiddenChanged(this.historyHidden);this._resultList.addEventListener("load-more",()=>this._loadMoreItems());this._exampleQueries.addEventListener("query-selected",e=>{// @ts-ignore
 this.query=e.detail.query});this._setExampleQueriesVisibility(this.infoVisibleByDefault)}/**
@@ -291,7 +290,8 @@ if(this.queriedPhrases&&0<this.queriedPhrases.length){options.maxfreq=this.queri
 if(copy.query!==void 0&&null!==copy.query){if(""===copy.query)return;if(!(0,_netspeak.normalizeQuery)(copy.query))return}if(!copy.query)throw Error("item.query has to be defined");if(!copy.corpus)throw Error("item.corpus has to be defined");copy.query=copy.query.trim();const history=this.history;// remove less recent entries
 for(let i=history.length-1;0<=i;i--){const it=history[i];if(!it||it.query==copy.query&&it.corpus==copy.corpus){history.splice(i,1)}}history.push(copy)}_historyHiddenChanged(newValue){if(!this._historyButton)return;this._historyButton.parentElement.style.display=newValue?"none":null}_historyButtonClick(){this._toggleHistoryDropDown()}_toggleHistoryDropDown(show=void 0){if(this.historyHidden||!this._historyButton)return;const container=this._historyButton.parentElement;if(show===void 0)show=!container.hasAttribute("history-visible");if(show){container.setAttribute("history-visible","");// current history
 const history=this.history.filter(i=>i.corpus===this.corpus).reverse(),historyLimit=10;if(history.length>historyLimit)history.splice(historyLimit,history.length-historyLimit);const positioner=(0,_util.appendNewElements)(container,"DIV#drop-down-positioner");positioner.style.paddingLeft=this._historyButton.clientWidth+"px";const dd=(0,_util.appendNewElements)(positioner,"BUTTON#drop-down");dd.onblur=()=>{container.removeAttribute("history-visible");dd.parentElement.remove()};// new option function
-const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.innerHTML=query;opt.onclick=()=>{this._toggleHistoryDropDown(!1);this.query=query}};history.forEach(i=>newOpt(i.query));if(0==history.length)newOpt("");dd.focus()}else{container.removeAttribute("history-visible");container.querySelector("#drop-down").blur()}}}/**
+const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.innerHTML=query;opt.onclick=()=>{this._toggleHistoryDropDown(!1);this.query=query}};history.forEach(i=>newOpt(i.query));if(0==history.length)newOpt("");dd.focus()}else{container.removeAttribute("history-visible");// @ts-ignore
+container.querySelector("#drop-down").blur()}}}/**
  * The result list of the Netspeak search bar.
  *
  * This element will handle everything that is contained in the result list including:
@@ -300,7 +300,7 @@ const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.
  * - Notifying that more phrases are requested
  * - Pinning phrases
  * - Querying and displaying examples
- */_exports.NetspeakSearchBar=NetspeakSearchBar;class NetspeakSearchBarResultList extends _netspeakElement.NetspeakElement{static get is(){return"netspeak-search-bar-result-list"}static get properties(){return{showLoadMore:{type:Boolean,notify:!0},phrases:{type:Array,notify:!0},formatter:{type:PhraseFormatter,notify:!0}}}static get template(){return _netspeakElement.html`
+ */_exports.NetspeakSearchBar=NetspeakSearchBar;class NetspeakSearchBarResultList extends _netspeakElement.NetspeakElement{static get is(){return"netspeak-search-bar-result-list"}static get properties(){return{showLoadMore:{type:Boolean,notify:!0},phrases:{type:Array,notify:!0},formatter:{type:PhraseFormatter,notify:!0},clickableItems:{type:Boolean,notify:!0}}}static get template(){return _netspeakElement.html`
 		${sharedStyles}
 
 		<style>
@@ -333,6 +333,9 @@ const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.
 				border-top: 1px solid #CCC;
 				position: relative;
 			}
+			#result-list>div:last-child div.options {
+				border-bottom: none;
+			}
 			/*#result-list>div div.options::before {
 				--size: 16px;
 
@@ -354,14 +357,14 @@ const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.
 
 
 			#result-list table {
-				margin: var(--result-item-data-margin, 0);
-				display: block;
+				padding: 0 var(--left-right-padding);
+				width: 100%;
 			}
 
 			#result-list table td:first-child {
 				width: 100%;
 				background-repeat: no-repeat;
-				background-position-x: 100%;
+				background-position-x: calc(100% + 1px);
 				background-image: url("/src/img/frequency-bar.svg");
 			}
 
@@ -460,7 +463,6 @@ const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.
 				padding: 1em;
 				background-color: var(--options-background-color);
 				color: #444;
-				/*box-shadow: 0 4px 32px rgba(0, 0, 0, .1) inset; */
 			}
 
 			#result-list [options-visible] div.options {
@@ -506,7 +508,7 @@ const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.
 			 */
 
 			#load-more-button {
-				border-top: 1px solid #BBB;
+				border-top: 1px solid var(--border-color);
 				cursor: pointer;
 				position: relative;
 				margin: 0;
@@ -536,6 +538,22 @@ const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.
 				background-image: url('/src/img/load-more.svg');
 			}
 
+			/*
+			 * Clickability changes
+			 */
+
+			#result-list.clickable table {
+				cursor: pointer;
+				padding: 0;
+			}
+			#result-list.clickable table td:first-child {
+				padding: 0 var(--left-right-padding);
+				height: calc(var(--icon-size) + 2 * var(--icon-padding));
+			}
+			#result-list.clickable table tr td:not(:first-child) {
+				display: none;
+			}
+
 		</style>
 
 		<div id="container">
@@ -544,7 +562,7 @@ const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.
 				<span class="load-more-img"></span>
 			</button>
 		</div>
-		`}get isEmpty(){return 0===this.pinnedPhrases.size+this.phrases.length}constructor(){super();this.showLoadMore=!1;this.examplePageSize=6;/** @type {Phrase[]} */this.phrases=[];/** @type {Map<string, Phrase>} */this.pinnedPhrases=new Map;this.snippetsApi=_snippets.Snippets.getInstance();this.formatter=PhraseFormatter.getInstance();this.invalidate=(0,_util.createNextFrameInvoker)(()=>this._render());this.addEventListener("phrases-changed",()=>this.invalidate());this.addEventListener("formatter-changed",()=>this.invalidate())}connectedCallback(){super.connectedCallback();/** @type {HTMLElement} */this._resultList=this.shadowRoot.querySelector("#result-list");/** @type {HTMLElement} */this._loadMore=this.shadowRoot.querySelector("#load-more-button");this.addEventListener("show-load-more-changed",()=>{if(this._loadMore){this._loadMore.style.display=this.showLoadMore?"block":"none"}});this._loadMore.addEventListener("click",()=>{this.dispatchEvent(new CustomEvent("load-more",{bubbles:!1,cancelable:!1}))})}clear(){this.phrases=[];this.pinnedPhrases.clear();this.showLoadMore=!1;this.invalidate()}_render(){if(!this.isConnected)return;const collection=new NewPhraseCollection(this._getAllPhrasesToRender()),existingElementPhraseIdsSet=new Set;// update or delete current DOM elements
+		`}get isEmpty(){return 0===this.pinnedPhrases.size+this.phrases.length}constructor(){super();this.showLoadMore=!1;this.examplePageSize=6;/** @type {Phrase[]} */this.phrases=[];/** @type {Map<string, Phrase>} */this.pinnedPhrases=new Map;/** @type {boolean} */this.clickableItems=this.clickableItems;this.snippetsApi=_snippets.Snippets.getInstance();this.formatter=PhraseFormatter.getInstance();this.invalidate=(0,_util.createNextFrameInvoker)(()=>this._render());this.addEventListener("phrases-changed",()=>this.invalidate());this.addEventListener("formatter-changed",()=>this.invalidate())}connectedCallback(){super.connectedCallback();/** @type {HTMLElement} */this._resultList=this.shadowRoot.querySelector("#result-list");/** @type {HTMLElement} */this._loadMore=this.shadowRoot.querySelector("#load-more-button");this.addEventListener("show-load-more-changed",()=>{if(this._loadMore){this._loadMore.style.display=this.showLoadMore?"block":"none"}});this._loadMore.addEventListener("click",()=>{this.dispatchEvent(new CustomEvent("load-more",{bubbles:!1,cancelable:!1}))});this.addEventListener("clickable-items-changed",()=>this._updateClickability());this._updateClickability()}_updateClickability(){if(!this._resultList)return;if(this.clickableItems){this._resultList.classList.add("clickable")}else{this._resultList.classList.remove("clickable")}}clear(){this.phrases=[];this.pinnedPhrases.clear();this.showLoadMore=!1;this.invalidate()}_render(){if(!this.isConnected)return;const collection=new NewPhraseCollection(this._getAllPhrasesToRender()),existingElementPhraseIdsSet=new Set;// update or delete current DOM elements
 for(let i=this._resultList.children.length-1;0<=i;i--){const element=/** @type {HTMLElement} */this._resultList.children[i],elementPhrase=this._getResultElementPhrase(element);if(!elementPhrase){// delete
 element.remove();continue}const mapEntry=collection.byId(elementPhrase.id);if(mapEntry){// update
 existingElementPhraseIdsSet.add(elementPhrase.id);this._setResultElementPinned(element,elementPhrase);this._setResultElementStats(element,elementPhrase,collection)}else{// delete
@@ -555,7 +573,7 @@ for(const phrase of collection){if(!existingElementPhraseIdsSet.has(phrase.id)){
 	 * @param {Phrase} phrase
 	 * @param {NewPhraseCollection} collection
 	 * @returns {HTMLElement}
-	 */_createResultElement(phrase,collection){const element=document.createElement("div");this._setResultElementPhrase(element,phrase);const tr=(0,_util.appendNewElements)(element,"TABLE","TBODY","TR"),td=(0,_util.appendNewElements)(tr,"TD");(0,_util.appendNewElements)(td,"DIV","SPAN.text");(0,_util.appendNewElements)(td,"SPAN.freq");const examplesBtn=(0,_util.appendNewElements)(tr,"TD","SPAN.btn-img.examples");examplesBtn.onclick=()=>this._toggleResultElementOptions(element);(0,_util.appendNewElements)(examplesBtn,"SPAN.btn-img");const pinningBtn=(0,_util.appendNewElements)(tr,"TD","SPAN.btn-img.pinned");pinningBtn.onclick=()=>this._toggleResultElementPinned(element);(0,_util.appendNewElements)(pinningBtn,"SPAN.btn-img");this._setResultElementStats(element,phrase,collection);return element}_toggleResultElementPinned(element){const phrase=this._getResultElementPhrase(element);if(this.pinnedPhrases.has(phrase.id)){this.pinnedPhrases.delete(phrase.id)}else{this.pinnedPhrases.set(phrase.id,phrase)}this._setResultElementPinned(element,phrase)}/**
+	 */_createResultElement(phrase,collection){const element=document.createElement("div");this._setResultElementPhrase(element,phrase);const table=(0,_util.appendNewElements)(element,"TABLE");table.addEventListener("click",()=>{if(this.clickableItems){this._toggleResultElementOptions(element)}});const tr=(0,_util.appendNewElements)(table,"TBODY","TR"),td=(0,_util.appendNewElements)(tr,"TD");(0,_util.appendNewElements)(td,"DIV","SPAN.text");(0,_util.appendNewElements)(td,"SPAN.freq");const examplesBtn=(0,_util.appendNewElements)(tr,"TD","SPAN.btn-img.examples");examplesBtn.onclick=()=>this._toggleResultElementOptions(element);(0,_util.appendNewElements)(examplesBtn,"SPAN.btn-img");const pinningBtn=(0,_util.appendNewElements)(tr,"TD","SPAN.btn-img.pinned");pinningBtn.onclick=()=>this._toggleResultElementPinned(element);(0,_util.appendNewElements)(pinningBtn,"SPAN.btn-img");this._setResultElementStats(element,phrase,collection);return element}_toggleResultElementPinned(element){const phrase=this._getResultElementPhrase(element);if(this.pinnedPhrases.has(phrase.id)){this.pinnedPhrases.delete(phrase.id)}else{this.pinnedPhrases.set(phrase.id,phrase)}this._setResultElementPinned(element,phrase)}/**
 	 * @param {HTMLElement} element
 	 */_toggleResultElementOptions(element){/** @type {HTMLElement} */const options=element.querySelector(".options");if(!options){this._addResultElementOptions(element);element.setAttribute("options-visible","")}else{const visible="none"!==options.style.display;if(visible){options.style.display="none";element.removeAttribute("options-visible")}else{options.style.display="block";element.setAttribute("options-visible","")}}}/**
 	 * @param {HTMLElement} element
@@ -590,7 +608,7 @@ if(!pastExamples.has(id)){pastExamples.add(id);snippetsBuffer.push({snippet:snip
 	 * @param {HTMLElement} element
 	 * @param {Phrase} phrase
 	 * @param {NewPhraseCollection} collection
-	 */_setResultElementStats(element,phrase,collection){const td=element.querySelector("td"),relativeFreq=phrase.frequency/collection.maxFrequency;td.style.backgroundSize=100*(.618*relativeFreq)+"% 100%";const text=this.formatter.formatText(phrase,collection),freq=this.formatter.formatFrequency(phrase,collection),percent=this.formatter.formatPercentage(phrase,collection);td.querySelector(".text").innerHTML=text;td.querySelector(".freq").innerHTML=`${freq}<span class="percentage">${percent}</span>`}/**
+	 */_setResultElementStats(element,phrase,collection){const td=element.querySelector("td"),relativeFreq=phrase.frequency/collection.maxFrequency;td.style.backgroundSize=`${100*(.618*relativeFreq)}% 100%`;const text=this.formatter.formatText(phrase,collection),freq=this.formatter.formatFrequency(phrase,collection),percent=this.formatter.formatPercentage(phrase,collection);td.querySelector(".text").innerHTML=text;td.querySelector(".freq").innerHTML=`${freq}<span class="percentage">${percent}</span>`}/**
 	 * Inserts the given element into the result list.
 	 *
 	 * @param {HTMLElement} element

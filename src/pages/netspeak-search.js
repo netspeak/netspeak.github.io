@@ -1,4 +1,4 @@
-define(["exports","meta","../netspeak-app/netspeak-element.js","../netspeak-app/netspeak-search-bar.js","../netspeak-app/netspeak-corpus-selector.js"],function(_exports,meta,_netspeakElement,_netspeakSearchBar,_netspeakCorpusSelector){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.NetspeakSearch=void 0;meta=babelHelpers.interopRequireWildcard(meta);class NetspeakSearch extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-search"}static get template(){return _netspeakElement.html`
+define(["exports","meta","../netspeak-app/netspeak-element.js","../netspeak-app/util.js","../netspeak-app/netspeak-search-bar.js","../netspeak-app/netspeak-corpus-selector.js"],function(_exports,meta,_netspeakElement,_util,_netspeakSearchBar,_netspeakCorpusSelector){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.NetspeakSearch=void 0;meta=babelHelpers.interopRequireWildcard(meta);class NetspeakSearch extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-search"}static get template(){return _netspeakElement.html`
 
 		<style>
 			:host {
@@ -26,11 +26,10 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","../netspeak-app/
 
 				netspeak-search-bar {
 					--icon-size: 20px;
-					--icon-padding: 6px;
-					--result-item-data-margin: 0 .5em;
+					--icon-padding: 5px;
+					--left-right-padding: .5em;
 					--input-margin: .5em;
-					--result-border-right: none;
-					--result-border-left: none;
+					--left-right-border-style: none;
 				}
 
 				netspeak-corpus-selector {
@@ -47,7 +46,7 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","../netspeak-app/
 		</div>
 		`}constructor(){super()}/**
 	 * The method called after the element was added to the DOM.
-	 */connectedCallback(){super.connectedCallback();/** @type {import("../netspeak-app/netspeak-search-bar").NetspeakSearchBar} */this.searchBar=/** @type {any} */this.shadowRoot.querySelector("netspeak-search-bar");/** @type {import("../netspeak-app/netspeak-corpus-selector").NetspeakCorpusSelector} */this.corpusSelector=/** @type {any} */this.shadowRoot.querySelector("netspeak-corpus-selector");this.searchBar.addEventListener("queryChange",()=>{this.updateUrl();clearTimeout(this._writeHistoryInterval);this._writeHistoryInterval=setTimeout(()=>this.writeHistory(),500)});this.corpusSelector.addEventListener("valueChange",()=>{this.searchBar.corpus=this.corpusSelector.value;this.searchBar.queryPhrases();this.updateUrl()});window.addEventListener("hashchange",()=>{this.initializeSettingsFromUrl()});this.initializeSettingsFromUrl();this.loadHistory()}/**
+	 */connectedCallback(){super.connectedCallback();/** @type {import("../netspeak-app/netspeak-search-bar").NetspeakSearchBar} */this.searchBar=/** @type {any} */this.shadowRoot.querySelector("netspeak-search-bar");/** @type {import("../netspeak-app/netspeak-corpus-selector").NetspeakCorpusSelector} */this.corpusSelector=/** @type {any} */this.shadowRoot.querySelector("netspeak-corpus-selector");this.searchBar.addEventListener("queryChange",()=>{this.updateUrl();clearTimeout(this._writeHistoryInterval);this._writeHistoryInterval=setTimeout(()=>this.writeHistory(),500)});this.corpusSelector.addEventListener("valueChange",()=>{this.searchBar.corpus=this.corpusSelector.value;this.searchBar.queryPhrases();this.updateUrl()});window.addEventListener("hashchange",()=>this.initializeSettingsFromUrl());this.initializeSettingsFromUrl();this.loadHistory();(0,_util.startClickableSearchBars)()}/**
 	 * Sets the values of the elements of the page to the values specified in the URL.
 	 */initializeSettingsFromUrl(){const params=new URLSearchParams(location.hash.replace(/^#/,"")),query=params.get("q"),corpus=params.get("corpus");if(null!=corpus)this.corpusSelector.value=corpus;if(null!=query)this.searchBar.query=query}/**
 	 * This function will set the URLs query to the current query of the search bar.
