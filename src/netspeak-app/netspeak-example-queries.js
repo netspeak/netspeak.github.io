@@ -2,8 +2,8 @@ define(["exports","meta","../netspeak-app/netspeak-element.js"],function(_export
  * A list of corpus specific example queries.
  *
  * @type {Object<string, Object<string, string>>}
- */const exampleQueries={"web-en":{"q-mark":"how to ? this",dots:"see ... works","option-set":"it's [ great well ]",hash:"and knows #much",order:"{ more show me }",gap:"mind... the g?p"},"web-de":{"q-mark":"was ? das",dots:"was ... hier ab","option-set":"wie [ n\xFCtzlich praktisch ]",// "hash": "and knows #much", // this feature isn't yet implemented on the server-side
-order:"{ mehr zeig mir }",gap:"M?t zur L\xFC...e"}},defaultCorpus="web-en";/**
+ */const exampleQueries={"web-en":{"q-mark":"how to ? this",dots:"see ... works","option-set":"it's [ great well ]",hash:"and knows #much",order:"{ more show me }",gap:"m...d ? g?p"},"web-de":{"q-mark":"was ? das",dots:"was ... hier ab","option-set":"wie [ n\xFCtzlich praktisch ]",// "hash": "and knows #much", // this feature isn't yet implemented on the server-side
+order:"{ rum richtig }",gap:"M?t ? L\xFC...e"}},defaultCorpus="web-en";/**
  * The default corpus for which examples will be displayed in case the current corpus is unknown.
  */class NetspeakExampleQueries extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-example-queries"}static get noDefaultLocalization(){return!0}static get properties(){return{corpus:{type:String,notify:!0}}}static get template(){return _netspeakElement.html`
 

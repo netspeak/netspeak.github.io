@@ -166,6 +166,8 @@ define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./uti
 
 			div#errors {
 				display: block;
+				border: 1px var(--border-color);
+				border-style: none var(--left-right-border-style) solid var(--left-right-border-style);
 			}
 
 			div#errors>p {
@@ -215,11 +217,11 @@ define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./uti
 			</table>
 		</div>
 
+		<div id="errors" style="display: none"></div>
+
 		<netspeak-example-queries corpus$="{{corpus}}"></netspeak-example-queries>
 
 		<div id="result-wrapper" style="display: none">
-
-			<div id="errors"></div>
 
 			<netspeak-search-bar-result-list></netspeak-search-bar-result-list>
 
@@ -280,9 +282,10 @@ let newPhrases=phrases.length;this.errorMessage="";if(append){newPhrases=this._q
 if(0<delay){setTimeout(()=>this._onSearchError(message,request,append,0),delay);return}// disable load more
 this._resultList.showLoadMore=!1;console.error(message,request);this.errorMessage=message;this.update(request.focusInput)}update(focusInput=!1){// declare variables
 const queriedPhrases=this.queriedPhrases;this._resultList.phrases=queriedPhrases.toArray();// wrapper
-/** @type {HTMLDivElement} */const wrapper=this.shadowRoot.querySelector("#result-wrapper");let showWrapper=!this._resultList.isEmpty;// output errors
-/** @type {HTMLElement} */const errors=this.shadowRoot.querySelector("#errors");errors.innerHTML="";if(this.errorMessage){(0,_util.appendNewElements)(errors,"P").innerHTML=this.errorMessage+"";showWrapper=!0}// wrapper
-wrapper.style.display=showWrapper?"block":"none";if(focusInput&&this._queryInputElement){this._queryInputElement.focus()}}_loadMoreItems(){/** @type {QueryPhrasesOptions} */const options={appendMode:"append",topk:this.initialLimit,searchOptions:{topkMode:"fill"}};// max frequency
+/** @type {HTMLDivElement} */const wrapper=this.shadowRoot.querySelector("#result-wrapper"),errors=this.shadowRoot.querySelector("#errors");// output errors
+/** @type {HTMLElement} */if(this.errorMessage){errors.style.display=null;errors.innerHTML="";(0,_util.appendNewElements)(errors,"P").textContent=this.errorMessage+"";// the wrapper should stay as is
+}else{errors.style.display="none";// wrapper
+wrapper.style.display=!this._resultList.isEmpty?"block":"none"}if(focusInput&&this._queryInputElement){this._queryInputElement.focus()}}_loadMoreItems(){/** @type {QueryPhrasesOptions} */const options={appendMode:"append",topk:this.initialLimit,searchOptions:{topkMode:"fill"}};// max frequency
 if(this.queriedPhrases&&0<this.queriedPhrases.length){options.maxfreq=this.queriedPhrases.at(this.queriedPhrases.length-1).frequency}this.queryPhrases(options)}/**
 	 * Clears the current query and removes all queried and pinned phrases.
 	 *

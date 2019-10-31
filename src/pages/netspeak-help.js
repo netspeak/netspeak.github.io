@@ -33,6 +33,16 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","../netspeak-app/
 				<div id="toc"></div>
 
 
+
+				<h2 id="contact">Contact</h2>
+
+				<p>
+					<span id="email">Email:</span>
+					<a href="mailto:info@netspeak.org">info@netspeak.org</a>
+				</p>
+
+
+
 				<h2 id="how">How Netspeak works</h2>
 
 				<p id="how-desc">
@@ -105,15 +115,6 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","../netspeak-app/
 						<netspeak-search-bar query="waiting ? ? response | waiting ? response" initial-limit="10" history-hidden></netspeak-search-bar>
 					</div>
 				</div>
-
-
-
-				<h2 id="contact">Contact</h2>
-
-				<p>
-					<span id="email">Email:</span>
-					<a href="mailto:info@netspeak.org">info@netspeak.org</a>
-				</p>
 
 
 
@@ -497,7 +498,7 @@ define(["exports","meta","../netspeak-app/netspeak-element.js","../netspeak-app/
 
 			</div>
 		`}getPageUrl(page){return _netspeakNavigator.NetspeakNavigator.getPageUrl(page)}connectedCallback(){super.connectedCallback();this.styleCode();this.generateTOC();// update the TOC after the localization has been loaded.
-(0,_netspeakElement.loadLocalization)(NetspeakHelp).then(json=>{if(json){this.generateTOC()}});(0,_util.startClickableSearchBars)()}generateTOC(){if(!this.shadowRoot)return;let container=this.shadowRoot.querySelector("#toc");container.innerHTML="";container=container.appendChild(document.createElement("ul"));for(const h of this.shadowRoot.querySelectorAll("h2[id], h3[id]")){const id=h.id;if("a"!==h.parentElement.tagName.toLowerCase()){const a=document.createElement("a");a.href="#"+id;h.replaceWith(a);a.appendChild(h)}const li=container.appendChild(document.createElement("li"));li.className=h.tagName.toLowerCase();const liIcon=li.appendChild(document.createElement("span"));liIcon.className="icon";const liLink=li.appendChild(document.createElement("a"));liLink.href="#"+id;liLink.textContent=h.textContent}}}_exports.NetspeakHelp=NetspeakHelp;(0,_netspeakElement.registerElement)(NetspeakHelp);function javaCodeExample(){return _netspeakElement.htmlR`public static void main(String[] args) throws IOException {
+(0,_netspeakElement.loadLocalization)(NetspeakHelp).then(json=>{if(json){this.generateTOC()}});(0,_util.startClickableSearchBars)()}generateTOC(){if(!this.shadowRoot)return;let container=this.shadowRoot.querySelector("#toc");container.innerHTML="";container=container.appendChild(document.createElement("ul"));for(const h of this.shadowRoot.querySelectorAll("h2[id]")){const id=h.id;if("a"!==h.parentElement.tagName.toLowerCase()){const a=document.createElement("a");a.href="#"+id;h.replaceWith(a);a.appendChild(h)}const li=container.appendChild(document.createElement("li"));li.className=h.tagName.toLowerCase();const liIcon=li.appendChild(document.createElement("span"));liIcon.className="icon";const liLink=li.appendChild(document.createElement("a"));liLink.href="#"+id;liLink.textContent=h.textContent}}}_exports.NetspeakHelp=NetspeakHelp;(0,_netspeakElement.registerElement)(NetspeakHelp);function javaCodeExample(){return _netspeakElement.htmlR`public static void main(String[] args) throws IOException {
     // Instantiate the Netspeak client once in your setup code.
     Netspeak netspeak = new Netspeak();
 
