@@ -11,6 +11,7 @@ define(["exports","../../node_modules/@polymer/polymer/polymer-element.js","./ne
 return(0,_polymerElement.html)([htmlSource])}/**
  * @typedef LocalizationJson
  * @property {Object<string, string>} [template]
+ * @property {Object<string, string>} [messages]
  * @property {any} [custom]
  *
  * @typedef {Function & PolymerConstructorProperties} PolymerConstructor
@@ -35,6 +36,15 @@ loadLocalization(this.constructor)}/**
 	 * The method called after the element was added to the DOM.
 	 */connectedCallback(){super.connectedCallback();loadLocalization(this.constructor).then(json=>{const shadowRoot=this.shadowRoot;if(shadowRoot&&json&&"object"===typeof json.template){const template=json.template;for(const element of shadowRoot.querySelectorAll("[id]")){let text;if(element.id&&"string"===typeof(text=template[element.id.toLowerCase()])){// only insert the text if the element doesn't contain other elements
 if(0===element.childElementCount){element.textContent=text}}}}}).catch(e=>{/* ignore all errors. */})}/**
+	 * Returns the message of the given key in the current language.
+	 *
+	 * The returned promise is guaranteed to resolve successfully.
+	 *
+	 * @param {string} key
+	 * @param {string} defaultValue
+	 * @returns {Promise<string>}
+	 */localMessage(key,defaultValue){return loadLocalization(this.constructor).then(json=>{if(json&&json.messages){if(key in json.messages){return json.messages[key]}else{// to make debugging a little easier
+console.warn(`There is no key '${key}' in the localization.`)}}return defaultValue}).catch(e=>{console.error(e);return defaultValue})}/**
 	 * Styles all code elements with a language-xxxx class.
 	 *
 	 * This will not affect elements which are highlighted already.

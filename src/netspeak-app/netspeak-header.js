@@ -1,4 +1,4 @@
-define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,_netspeakElement,_netspeakNavigator){"use strict";meta=babelHelpers.interopRequireWildcard(meta);class NetspeakHeader extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-header"}static get properties(){return{}}static get template(){return _netspeakElement.html`
+define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,_netspeakElement,_netspeakNavigator){"use strict";meta=babelHelpers.interopRequireWildcard(meta);class NetspeakHeader extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-header"}static get template(){return _netspeakElement.html`
 		<style>
 			:host {
 				background: #323232;
@@ -10,7 +10,7 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,
 
 			#content {
 				max-width: 800px;
-				padding: 8px 16px;
+				padding: 19px 16px;
 				box-sizing: border-box;
 				margin: 0 auto;
 			}

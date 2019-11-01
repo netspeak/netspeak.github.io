@@ -1,4 +1,4 @@
-define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./util.js","./netspeak-navigator.js","./netspeak-example-queries.js"],function(_exports,_netspeakElement,_netspeak,_snippets,_util,_netspeakNavigator,_netspeakExampleQueries){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.PhraseFormatter=_exports.NetspeakSearchBar=void 0;/**
+define(["exports","meta","./netspeak-element.js","./netspeak.js","./snippets.js","./util.js","./netspeak-navigator.js","./netspeak-example-queries.js"],function(_exports,meta,_netspeakElement,_netspeak,_snippets,_util,_netspeakNavigator,_netspeakExampleQueries){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.PhraseFormatter=_exports.NetspeakSearchBar=void 0;meta=babelHelpers.interopRequireWildcard(meta);/**
  * @typedef QueryPhrasesOptions
  * @property {"append" | "overwrite"} [options.appendMode="overwrite"] How the queried phrases will be integrated into the existing ones. "append": All of the new phrases will be added. "overwrite": All already queried phrases will be removed and the newly queried will be added.
  * @property {number} [options.topk=this.initialLimit] The maximum number of phrases queried.
@@ -102,7 +102,6 @@ define(["exports","./netspeak-element.js","./netspeak.js","./snippets.js","./uti
 			#box button.btn-img {
 				padding-top: .5em;
 				padding-bottom: .5em;
-				display: table;
 			}
 
 			#box #example-queries-button>* {
@@ -303,7 +302,7 @@ container.querySelector("#drop-down").blur()}}}/**
  * - Notifying that more phrases are requested
  * - Pinning phrases
  * - Querying and displaying examples
- */_exports.NetspeakSearchBar=NetspeakSearchBar;class NetspeakSearchBarResultList extends _netspeakElement.NetspeakElement{static get is(){return"netspeak-search-bar-result-list"}static get properties(){return{showLoadMore:{type:Boolean,notify:!0},phrases:{type:Array,notify:!0},formatter:{type:PhraseFormatter,notify:!0},clickableItems:{type:Boolean,notify:!0}}}static get template(){return _netspeakElement.html`
+ */_exports.NetspeakSearchBar=NetspeakSearchBar;class NetspeakSearchBarResultList extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-search-bar-result-list"}static get properties(){return{showLoadMore:{type:Boolean,notify:!0},phrases:{type:Array,notify:!0},formatter:{type:PhraseFormatter,notify:!0},clickableItems:{type:Boolean,notify:!0}}}static get template(){return _netspeakElement.html`
 		${sharedStyles}
 
 		<style>
@@ -339,24 +338,6 @@ container.querySelector("#drop-down").blur()}}}/**
 			#result-list>div:last-child div.options {
 				border-bottom: none;
 			}
-			/*#result-list>div div.options::before {
-				--size: 16px;
-
-				content: "";
-				display: block;
-				width: var(--size);
-				height: var(--size);
-				position: absolute;
-
-				top: calc(var(--size) / -2 - 1px);
-				left: calc(50% - var(--size));
-				background: linear-gradient(45deg, transparent 50%, var(--item-background-color) 50%);
-				transform: scaleX(1) rotate(135deg);
-
-				border: 1px solid #CCC;
-				border-bottom: none;
-				border-left: none;
-			}*/
 
 
 			#result-list table {
@@ -559,12 +540,11 @@ container.querySelector("#drop-down").blur()}}}/**
 
 		</style>
 
-		<div id="container">
-			<div id="result-list"></div>
-			<button id="load-more-button" style="display: none;">
-				<span class="load-more-img"></span>
-			</button>
-		</div>
+		<div id="result-list"></div>
+
+		<button id="load-more-button" style="display: none;">
+			<span class="load-more-img"></span>
+		</button>
 		`}get isEmpty(){return 0===this.pinnedPhrases.size+this.phrases.length}constructor(){super();this.showLoadMore=!1;this.examplePageSize=6;/** @type {Phrase[]} */this.phrases=[];/** @type {Map<string, Phrase>} */this.pinnedPhrases=new Map;/** @type {boolean} */this.clickableItems=this.clickableItems;this.snippetsApi=_snippets.Snippets.getInstance();this.formatter=PhraseFormatter.getInstance();this.invalidate=(0,_util.createNextFrameInvoker)(()=>this._render());this.addEventListener("phrases-changed",()=>this.invalidate());this.addEventListener("formatter-changed",()=>this.invalidate())}connectedCallback(){super.connectedCallback();/** @type {HTMLElement} */this._resultList=this.shadowRoot.querySelector("#result-list");/** @type {HTMLElement} */this._loadMore=this.shadowRoot.querySelector("#load-more-button");this.addEventListener("show-load-more-changed",()=>{if(this._loadMore){this._loadMore.style.display=this.showLoadMore?"block":"none"}});this._loadMore.addEventListener("click",()=>{this.dispatchEvent(new CustomEvent("load-more",{bubbles:!1,cancelable:!1}))});this.addEventListener("clickable-items-changed",()=>this._updateClickability());this._updateClickability()}_updateClickability(){if(!this._resultList)return;if(this.clickableItems){this._resultList.classList.add("clickable")}else{this._resultList.classList.remove("clickable")}}clear(){this.phrases=[];this.pinnedPhrases.clear();this.showLoadMore=!1;this.invalidate()}_render(){if(!this.isConnected)return;const collection=new NewPhraseCollection(this._getAllPhrasesToRender()),existingElementPhraseIdsSet=new Set;// update or delete current DOM elements
 for(let i=this._resultList.children.length-1;0<=i;i--){const element=/** @type {HTMLElement} */this._resultList.children[i],elementPhrase=this._getResultElementPhrase(element);if(!elementPhrase){// delete
 element.remove();continue}const mapEntry=collection.byId(elementPhrase.id);if(mapEntry){// update
@@ -583,7 +563,7 @@ for(const phrase of collection){if(!existingElementPhraseIdsSet.has(phrase.id)){
 	 * @returns {HTMLElement}
 	 */_addResultElementOptions(element){const phrase=this._getResultElementPhrase(element),options=(0,_util.appendNewElements)(element,"DIV.options"),examplesContainer=(0,_util.appendNewElements)(options,"DIV.examples-container"),examplesList=(0,_util.appendNewElements)(examplesContainer,"div.examples-list"),loadMoreExamplesContainer=(0,_util.appendNewElements)(examplesContainer,"div.load-more-examples"),loadingIcon=(0,_util.appendNewElements)(loadMoreExamplesContainer,"SPAN.btn-img.loading");(0,_util.appendNewElements)(loadingIcon,"SPAN.btn-img");// load more button
 const button=(0,_util.appendNewElements)(loadMoreExamplesContainer,"BUTTON.load-more");(0,_util.appendNewElements)(button,"SPAN.load-more-img");button.addEventListener("click",()=>loadMoreExamples());// load examples function
-const exampleSupplier=this._createExampleSupplier(phrase,this.examplePageSize);function loadMoreExamples(){loadingIcon.style.display=null;button.style.display="none";exampleSupplier().then(examples=>{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=example.snippet;(0,_util.appendNewElements)(p,"A").setAttribute("href",example.source)}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.textContent="Failed to load examples."})}// load examples right now.
+const exampleSupplier=this._createExampleSupplier(phrase,this.examplePageSize),loadMoreExamples=()=>{loadingIcon.style.display=null;button.style.display="none";exampleSupplier().then(examples=>{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=example.snippet;(0,_util.appendNewElements)(p,"A").setAttribute("href",example.source)}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("failed-to-load-examples","Failed to load examples.").then(msg=>{p.textContent=msg})})};// load examples right now.
 loadMoreExamples();return options}/**
 	 * Returns a function which will return a new examples every time it is invoked.
 	 *

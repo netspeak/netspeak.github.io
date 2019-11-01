@@ -1,4 +1,4 @@
-define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,_netspeakElement,_netspeakNavigator){"use strict";meta=babelHelpers.interopRequireWildcard(meta);class NetspeakFooter extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-footer"}static get properties(){return{}}static get template(){return _netspeakElement.html`
+define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,_netspeakElement,_netspeakNavigator){"use strict";meta=babelHelpers.interopRequireWildcard(meta);class NetspeakFooter extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-footer"}static get template(){return _netspeakElement.html`
 <style>
 	:host {
 		display: block;
