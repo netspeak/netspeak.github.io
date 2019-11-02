@@ -1,4 +1,4 @@
-define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;_exports.startClickableSearchBars=startClickableSearchBars;/**
+define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.encode=encode;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;_exports.startClickableSearchBars=startClickableSearchBars;/**
  *
  * @param {T | T[]} value
  * @returns {T[]}
@@ -60,6 +60,11 @@ const id=selector.match(/#([\w-]+)/),classes=selector.match(/\.[\w-]+/g),e=docum
  * @returns {string}
  */function textContent(html){// copied from PrismJS' markup definition
 html=html.replace(/<\/?(?!\d)[^\s>/=$<%]+(?:\s(?:\s*[^\s>/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/g,"");const div=document.createElement("div");div.innerHTML=html;return div.textContent}/**
+ * Encodes the given string such that it's a text literal.
+ *
+ * @param {string} html
+ * @returns {string}
+ */function encode(html){return html.replace(/&/g,"&amp;").replace(/</g,"&lt;")}/**
  * Returns a function which will execute the given function only once in the next frame.
  *
  * @param {() => void} func

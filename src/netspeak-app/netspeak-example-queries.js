@@ -19,33 +19,28 @@ order:"{ rum richtig }",gap:"M?t ? L\xFC...e"}},defaultCorpus="web-en";/**
 				border-style: none var(--left-right-border-style) solid var(--left-right-border-style);
 				clear: both;
 				position: relative;
-			}
-
-			#quick-examples {
 				padding: .5em 1em;
-				position: relative;
 			}
 
-			.example-container {
-				clear: both;
-				position: relative;
-				padding: .1em 0;
-			}
-
-			.example-container::after {
-				clear: both;
-				content: " ";
-				display: table;
-				position: relative;
+			table {
 				width: 100%;
+				padding: 0;
+				margin: 0;
+				border: none;
+				border-collapse: none;
+				border-spacing: 0;
+			}
+			tr {
+				padding: 0;
+			}
+			td {
+				padding: .125em 0;
 			}
 
 			.example {
-				float: left;
+				white-space: nowrap;
 			}
-
 			.explanation {
-				float: right;
 				width: 50%;
 			}
 
@@ -71,18 +66,42 @@ order:"{ rum richtig }",gap:"M?t ? L\xFC...e"}},defaultCorpus="web-en";/**
 
 			@media screen and (max-width: 500px) {
 
+				.spacer {
+					display: none;
+				}
+
+				tr {
+					display: block;
+					padding: .2em 0
+				}
+
 				.example,
 				.explanation {
-					float: none;
-					display: block;
+					display: inline-block;
 					width: auto;
+					padding: 0;
+				}
+
+				.example {
+					color: #222;
+					font-size: 105%;
+				}
+
+				.explanation {
+					color: #666;
+					font-size: 100%;
+				}
+				.explanation::before {
+					content: "–";
+					display: inline;
+					padding: 0 .5em;
 				}
 
 			}
 		</style>
 
 		<div id="info">
-			<div id="quick-examples"></div>
+			<table></table>
 		</div>
 		`}constructor(){super();this.corpus=defaultCorpus;this.addEventListener("corpus-changed",()=>{this._renderExamples()});/**
 		 * @type {undefined | Object<string, string>}
@@ -92,8 +111,9 @@ order:"{ rum richtig }",gap:"M?t ? L\xFC...e"}},defaultCorpus="web-en";/**
 		 * @type {number}
 		 */this.clickCounter=0}/**
 	 * The method called after the element was added to the DOM.
-	 */connectedCallback(){super.connectedCallback();this._renderExamples()}_renderExamples(){if(!this.isConnected)return;if(!this._localization)return;const examples=exampleQueries[this.corpus]||exampleQueries[defaultCorpus],container=this.shadowRoot.querySelector("#quick-examples");container.innerHTML="";// @ts-ignore
-const highlight=code=>Prism.highlight(code,Prism.languages["netspeak-query"],"netspeak-query");for(const exampleKey in examples){const query=examples[exampleKey],exContainer=container.appendChild(document.createElement("div"));exContainer.className="example-container";exContainer.innerHTML=`
-				<div class="example"><span>${highlight(query)}</span></div>
-				<div class="explanation">${highlight(this._localization[exampleKey])}</div>
-			`;exContainer.querySelector(".example > span").addEventListener("click",()=>{this._querySelected(query)})}}_querySelected(query){this.clickCounter++;this.dispatchEvent(new CustomEvent("query-selected",{detail:{query},bubbles:!1,cancelable:!1}))}}_exports.NetspeakExampleQueries=NetspeakExampleQueries;(0,_netspeakElement.registerElement)(NetspeakExampleQueries)});
+	 */connectedCallback(){super.connectedCallback();this._renderExamples()}_renderExamples(){if(!this.isConnected)return;if(!this._localization)return;const examples=exampleQueries[this.corpus]||exampleQueries[defaultCorpus],table=this.shadowRoot.querySelector("table");table.innerHTML="";// @ts-ignore
+const highlight=code=>Prism.highlight(code,Prism.languages["netspeak-query"],"netspeak-query");for(const exampleKey in examples){const query=examples[exampleKey],tr=table.appendChild(document.createElement("tr"));tr.innerHTML=`
+				<td class="example"><span>${highlight(query)}</span></td>
+				<td class="spacer"></td>
+				<td class="explanation">${highlight(this._localization[exampleKey])}</td>
+			`;tr.querySelector(".example > span").addEventListener("click",()=>{this._querySelected(query)})}}_querySelected(query){this.clickCounter++;this.dispatchEvent(new CustomEvent("query-selected",{detail:{query},bubbles:!1,cancelable:!1}))}}_exports.NetspeakExampleQueries=NetspeakExampleQueries;(0,_netspeakElement.registerElement)(NetspeakExampleQueries)});
