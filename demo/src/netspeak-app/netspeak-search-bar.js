@@ -456,7 +456,22 @@ container.querySelector("#drop-down").blur()}}}/**
 				opacity: 1;
 			}
 			#result-list .loading>span.btn-img {
+				animation-name: show-via-opacity;
+				animation-duration: 3s;
 				background-image: url("/src/img/loading.svg");
+			}
+			@keyframes show-via-opacity {
+				from {
+					opacity: 0;
+				}
+
+				50% {
+					opacity: 0;
+				}
+
+				to {
+					opacity: 100%;
+				}
 			}
 
 			#result-list .options .examples-container {
@@ -465,6 +480,9 @@ container.querySelector("#drop-down").blur()}}}/**
 			#result-list .options .examples-list {
 				font-size: 90%;
 				word-break: break-word;
+			}
+			#result-list .options .load-more-examples {
+				text-align: center;
 			}
 
 			#result-list .options .examples-list em {
@@ -514,11 +532,12 @@ container.querySelector("#drop-down").blur()}}}/**
 				background-color: #EEE;
 			}
 
-			#load-more-button:hover>.load-more-img {
+			/* These are for both the result list load-more button and the examples load-more buttons */
+
+			*:hover>span.load-more-img {
 				opacity: 1;
 			}
-
-			#load-more-button .load-more-img {
+			span.load-more-img {
 				opacity: .5;
 				display: block;
 				width: 4em;
