@@ -1,23 +1,4 @@
-define(["meta", "./netspeak-element.js", "./netspeak-navigator.js"], function (meta, _netspeakElement, _netspeakNavigator) {
-  "use strict";
-
-  meta = babelHelpers.interopRequireWildcard(meta);
-
-  class NetspeakFooter extends _netspeakElement.NetspeakElement {
-    static get importMeta() {
-      return meta;
-    }
-
-    static get is() {
-      return 'netspeak-footer';
-    }
-
-    static get properties() {
-      return {};
-    }
-
-    static get template() {
-      return _netspeakElement.html`
+define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,_netspeakElement,_netspeakNavigator){"use strict";meta=babelHelpers.interopRequireWildcard(meta);class NetspeakFooter extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-footer"}static get template(){return _netspeakElement.html`
 <style>
 	:host {
 		display: block;
@@ -57,15 +38,15 @@ define(["meta", "./netspeak-element.js", "./netspeak-navigator.js"], function (m
 	}
 
 	.bullet {
-		padding: 0 12px;
+		padding: 0 5px;
 	}
 
 	.pipe {
-		padding: 0 24px;
+		padding: 0 15px;
 	}
 
 
-	@media screen and (max-width: 1000px) {
+	@media screen and (max-width: 750px) {
 		:host {
 			padding: 2em;
 		}
@@ -89,16 +70,14 @@ define(["meta", "./netspeak-element.js", "./netspeak-navigator.js"], function (m
 
 <div>
 	<div id="webis-copyright">
-		Copyright &copy; 2019 <a href="https://webis.de" target="_blank">Webis group</a>
+		&copy; 2019 <a href="https://webis.de" target="_blank">Webis group</a>
 		<span class="bullet">&bullet;</span>
 		<a href="https://webis.de/people.html" target="_blank" id="contact">Contact</a>
 		<span class="bullet">&bullet;</span>
-		<a href="https://webis.de/impressum.html" target="_blank" id="impressum-and-privacy">Impressum&nbsp;/&nbsp;Privacy&nbsp;policy</a>
+		<a href="https://webis.de/impressum.html" target="_blank" id="impressum-and-privacy">Impressum&nbsp;/&nbsp;Terms&nbsp;/&nbsp;Privacy</a>
 	</div>
 	<div id="netspeak-points">
 		<a href="[[getPageUrl('help')]]" id="help">Help</a>
-		<span class="bullet">&bullet;</span>
-		<a href="[[getPageUrl('terms')]]" id="terms">Terms</a>
 	</div>
 	<div id="language-section">
 		<span class="pipe">|</span>
@@ -109,43 +88,19 @@ define(["meta", "./netspeak-element.js", "./netspeak-navigator.js"], function (m
 </div>
 
 <div style="clear: both"></div>
-		`;
-    }
-    /**
-     * Returns the URL a given page will have.
-     *
-     * @param {string} page The page.
-     * @returns {string} The URL.
-     */
-
-
-    getPageUrl(page) {
-      return _netspeakNavigator.NetspeakNavigator.getPageUrl(page);
-    }
-    /**
-     * Returns the URL the current page with a given language will have.
-     *
-     * @param {string} lang The language.
-     * @returns {string} The URL.
-     */
-
-
-    getLangUrl(lang) {
-      return _netspeakNavigator.NetspeakNavigator.getLanguageUrl(lang);
-    }
-    /**
-     * Returns CSS classes indicating whether the given language is the current language.
-     *
-     * @param {string} lang The language.
-     * @returns {string} The CSS class string.
-     */
-
-
-    isCurrentLang(lang) {
-      return _netspeakNavigator.NetspeakNavigator.currentLanguage == lang ? 'current-lang' : '';
-    }
-
-  }
-
-  (0, _netspeakElement.registerElement)(NetspeakFooter);
-});
+		`}/**
+	 * Returns the URL a given page will have.
+	 *
+	 * @param {string} page The page.
+	 * @returns {string} The URL.
+	 */getPageUrl(page){return _netspeakNavigator.NetspeakNavigator.getPageUrl(page)}/**
+	 * Returns the URL the current page with a given language will have.
+	 *
+	 * @param {string} lang The language.
+	 * @returns {string} The URL.
+	 */getLangUrl(lang){return _netspeakNavigator.NetspeakNavigator.getLanguageUrl(lang)}/**
+	 * Returns CSS classes indicating whether the given language is the current language.
+	 *
+	 * @param {string} lang The language.
+	 * @returns {string} The CSS class string.
+	 */isCurrentLang(lang){return _netspeakNavigator.NetspeakNavigator.currentLanguage==lang?"current-lang":""}}(0,_netspeakElement.registerElement)(NetspeakFooter)});

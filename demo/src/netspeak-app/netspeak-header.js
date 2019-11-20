@@ -1,23 +1,4 @@
-define(["meta", "./netspeak-element.js", "./netspeak-navigator.js"], function (meta, _netspeakElement, _netspeakNavigator) {
-  "use strict";
-
-  meta = babelHelpers.interopRequireWildcard(meta);
-
-  class NetspeakHeader extends _netspeakElement.NetspeakElement {
-    static get importMeta() {
-      return meta;
-    }
-
-    static get is() {
-      return 'netspeak-header';
-    }
-
-    static get properties() {
-      return {};
-    }
-
-    static get template() {
-      return _netspeakElement.html`
+define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,_netspeakElement,_netspeakNavigator){"use strict";meta=babelHelpers.interopRequireWildcard(meta);class NetspeakHeader extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-header"}static get template(){return _netspeakElement.html`
 		<style>
 			:host {
 				background: #323232;
@@ -29,9 +10,9 @@ define(["meta", "./netspeak-element.js", "./netspeak-navigator.js"], function (m
 
 			#content {
 				max-width: 800px;
-				padding: 8px 16px;
+				padding: 19px 0;
 				box-sizing: border-box;
-				margin: 0 auto;
+				margin: 0 64px;
 			}
 
 			#logo {
@@ -56,7 +37,7 @@ define(["meta", "./netspeak-element.js", "./netspeak-navigator.js"], function (m
 				padding-left: 16px;
 			}
 
-			@media screen and (max-width: 750px) {
+			@media screen and (max-width: 500px) {
 
 				:host {
 					height: 48px;
@@ -88,24 +69,8 @@ define(["meta", "./netspeak-element.js", "./netspeak-navigator.js"], function (m
 			</span>
 			<div style="clear: both"></div>
 		</div>
-		`;
-    }
-
-    constructor() {
-      super();
-    }
-    /**
-     * Returns the URL of the start page.
-     *
-     * @returns {string} The URL.
-     */
-
-
-    getStartUrl() {
-      return _netspeakNavigator.NetspeakNavigator.getPageUrl("index");
-    }
-
-  }
-
-  (0, _netspeakElement.registerElement)(NetspeakHeader);
-});
+		`}constructor(){super()}/**
+	 * Returns the URL of the start page.
+	 *
+	 * @returns {string} The URL.
+	 */getStartUrl(){return _netspeakNavigator.NetspeakNavigator.getPageUrl("index")}}(0,_netspeakElement.registerElement)(NetspeakHeader)});

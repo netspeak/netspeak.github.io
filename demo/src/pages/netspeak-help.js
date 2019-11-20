@@ -1,23 +1,4 @@
-define(["exports", "meta", "../netspeak-app/netspeak-element.js", "../netspeak-app/netspeak-navigator.js", "./page-styles.js", "../netspeak-app/util.js", "../netspeak-app/netspeak-search-bar.js"], function (_exports, meta, _netspeakElement, _netspeakNavigator, _pageStyles, _util, _netspeakSearchBar) {
-  "use strict";
-
-  Object.defineProperty(_exports, "__esModule", {
-    value: true
-  });
-  _exports.NetspeakHelp = void 0;
-  meta = babelHelpers.interopRequireWildcard(meta);
-
-  class NetspeakHelp extends _netspeakElement.NetspeakElement {
-    static get importMeta() {
-      return meta;
-    }
-
-    static get is() {
-      return 'netspeak-help';
-    }
-
-    static get template() {
-      return _netspeakElement.html`${_pageStyles.styles}
+define(["exports","meta","../netspeak-app/netspeak-element.js","../netspeak-app/netspeak-navigator.js","./page-styles.js","../netspeak-app/util.js","../netspeak-app/netspeak-search-bar.js"],function(_exports,meta,_netspeakElement,_netspeakNavigator,_pageStyles,_util,_netspeakSearchBar){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.NetspeakHelp=void 0;meta=babelHelpers.interopRequireWildcard(meta);class NetspeakHelp extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-help"}static get template(){return _netspeakElement.html`${_pageStyles.styles}
 			<style>
 				#toc ul {
 					padding: 0;
@@ -52,6 +33,16 @@ define(["exports", "meta", "../netspeak-app/netspeak-element.js", "../netspeak-a
 				<div id="toc"></div>
 
 
+
+				<h2 id="contact">Contact</h2>
+
+				<p>
+					<span id="email">Email:</span>
+					<a href="mailto:info@netspeak.org">info@netspeak.org</a>
+				</p>
+
+
+
 				<h2 id="how">How Netspeak works</h2>
 
 				<p id="how-desc">
@@ -59,7 +50,7 @@ define(["exports", "meta", "../netspeak-app/netspeak-element.js", "../netspeak-a
 				</p>
 
 
-				<h3 id="examples">Examples</h1>
+				<h3 id="examples">Examples</h3>
 
 				<div class="group-box">
 					<span class="group-title" id="example-1">Find one word</span>
@@ -121,18 +112,9 @@ define(["exports", "meta", "../netspeak-app/netspeak-element.js", "../netspeak-a
 					<span class="group-title" id="example-7">Compare phrases</span>
 					<div class="group-content">
 						<p id="example-7-desc">Use the pipe sign between phrases to get a comparison</p>
-						<netspeak-search-bar query="waiting ? ? response | waiting ? response" initial-limit="10" history-hidden></				netspeak-search-bar>
+						<netspeak-search-bar query="waiting ? ? response | waiting ? response" initial-limit="10" history-hidden></netspeak-search-bar>
 					</div>
 				</div>
-
-
-
-				<h2 id="contact">Contact</h2>
-
-				<p>
-					<span id="email">Email:</span>
-					<a href="mailto:info@netspeak.org">info@netspeak.org</a>
-				</p>
 
 
 
@@ -515,58 +497,8 @@ define(["exports", "meta", "../netspeak-app/netspeak-element.js", "../netspeak-a
 				<pre><code class="language-java">${javaCodeExample()}</code></pre>
 
 			</div>
-		`;
-    }
-
-    getPageUrl(page) {
-      return _netspeakNavigator.NetspeakNavigator.getPageUrl(page);
-    }
-
-    connectedCallback() {
-      super.connectedCallback();
-      this.styleCode();
-      this.generateTOC(); // update the TOC after the localization has been loaded.
-
-      (0, _netspeakElement.loadLocalization)(NetspeakHelp).then(json => {
-        if (json) {
-          this.generateTOC();
-        }
-      });
-    }
-
-    generateTOC() {
-      if (!this.shadowRoot) return;
-      let container = this.shadowRoot.querySelector("#toc");
-      container.innerHTML = "";
-      container = container.appendChild(document.createElement("ul"));
-
-      for (const h of this.shadowRoot.querySelectorAll("h2[id], h3[id]")) {
-        const id = h.id;
-
-        if (h.parentElement.tagName.toLowerCase() !== "a") {
-          const a = document.createElement("a");
-          a.href = "#" + id;
-          h.replaceWith(a);
-          a.appendChild(h);
-        }
-
-        const li = container.appendChild(document.createElement("li"));
-        li.className = h.tagName.toLowerCase();
-        const liIcon = li.appendChild(document.createElement("span"));
-        liIcon.className = "icon";
-        const liLink = li.appendChild(document.createElement("a"));
-        liLink.href = "#" + id;
-        liLink.textContent = h.textContent;
-      }
-    }
-
-  }
-
-  _exports.NetspeakHelp = NetspeakHelp;
-  (0, _netspeakElement.registerElement)(NetspeakHelp);
-
-  function javaCodeExample() {
-    return _netspeakElement.htmlR`public static void main(String[] args) throws IOException {
+		`}getPageUrl(page){return _netspeakNavigator.NetspeakNavigator.getPageUrl(page)}connectedCallback(){super.connectedCallback();this.styleCode();this.generateTOC();// update the TOC after the localization has been loaded.
+(0,_netspeakElement.loadLocalization)(NetspeakHelp).then(json=>{if(json){this.generateTOC()}})}generateTOC(){if(!this.shadowRoot)return;let container=this.shadowRoot.querySelector("#toc");container.innerHTML="";container=container.appendChild(document.createElement("ul"));for(const h of this.shadowRoot.querySelectorAll("h2[id]")){const id=h.id;if("a"!==h.parentElement.tagName.toLowerCase()){const a=document.createElement("a");a.href="#"+id;h.replaceWith(a);a.appendChild(h)}const li=container.appendChild(document.createElement("li"));li.className=h.tagName.toLowerCase();const liIcon=li.appendChild(document.createElement("span"));liIcon.className="icon";const liLink=li.appendChild(document.createElement("a"));liLink.href="#"+id;liLink.textContent=h.textContent}}}_exports.NetspeakHelp=NetspeakHelp;(0,_netspeakElement.registerElement)(NetspeakHelp);function javaCodeExample(){return _netspeakElement.htmlR`public static void main(String[] args) throws IOException {
     // Instantiate the Netspeak client once in your setup code.
     Netspeak netspeak = new Netspeak();
 
@@ -626,8 +558,4 @@ define(["exports", "meta", "../netspeak-app/netspeak-element.js", "../netspeak-a
             }
         }
     });
-}`;
-  }
-
-  (0, _util.startScrollToUrlHash)();
-});
+}`}(0,_util.startScrollToUrlHash)()});

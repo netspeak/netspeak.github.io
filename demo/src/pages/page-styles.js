@@ -1,11 +1,4 @@
-define(["exports", "../../node_modules/@polymer/polymer/polymer-element.js"], function (_exports, _polymerElement) {
-  "use strict";
-
-  Object.defineProperty(_exports, "__esModule", {
-    value: true
-  });
-  _exports.styles = void 0;
-  const styles = _polymerElement.html`
+define(["exports","../../node_modules/@polymer/polymer/polymer-element.js"],function(_exports,_polymerElement){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.styles=void 0;const styles=_polymerElement.html`
 <style>
 	div.article {
 		padding: 3em 1em;
@@ -252,6 +245,4 @@ define(["exports", "../../node_modules/@polymer/polymer/polymer-element.js"], fu
 		cursor: help;
 	}
 </style>
-`;
-  _exports.styles = styles;
-});
+`;_exports.styles=styles});
