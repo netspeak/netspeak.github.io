@@ -432,7 +432,7 @@ container.querySelector("#drop-down").blur()}}}/**
 
 			#result-list .options .buttons {
 				text-align: right;
-				padding: 0 var(--left-right-padding);
+				margin: .25em var(--left-right-padding);
 			}
 
 			#result-list .pinned>span.btn-img {
@@ -457,7 +457,7 @@ container.querySelector("#drop-down").blur()}}}/**
 			}
 			#result-list .loading>span.btn-img {
 				animation-name: show-via-opacity;
-				animation-duration: 3s;
+				animation-duration: 1s;
 				background-image: url("/src/img/loading.svg");
 			}
 			@keyframes show-via-opacity {
@@ -465,7 +465,7 @@ container.querySelector("#drop-down").blur()}}}/**
 					opacity: 0;
 				}
 
-				50% {
+				20% {
 					opacity: 0;
 				}
 
@@ -573,28 +573,29 @@ for(const phrase of collection){if(!existingElementPhraseIdsSet.has(phrase.id)){
 	 */_toggleResultElementOptions(element){/** @type {HTMLElement} */const options=element.querySelector(".options");if(!options){this._addResultElementOptions(element);element.setAttribute("options-visible","")}else{const visible="none"!==options.style.display;if(visible){options.style.display="none";element.removeAttribute("options-visible")}else{options.style.display="block";element.setAttribute("options-visible","")}}}/**
 	 * @param {HTMLElement} element
 	 */_addResultElementOptions(element){const phrase=this._getResultElementPhrase(element),options=(0,_util.appendNewElements)(element,"DIV.options"),buttons=(0,_util.appendNewElements)(options,"div.buttons"),copyBtn=(0,_util.appendNewElements)(buttons,"SPAN.btn-img.copy");//copyBtn.onclick = () => console.log(`Copy "${phrase.text}"`);
-(0,_util.appendNewElements)(copyBtn,"SPAN.btn-img");const copyText=(0,_util.appendNewElements)(copyBtn,"SPAN.btn-text");this.localMessage("copy","Copy").then(msg=>{copyText.textContent=msg});(0,_util.createClipboardButton)(copyBtn,phrase.text);// pin button
+(0,_util.appendNewElements)(copyBtn,"SPAN.btn-img");const copyText=(0,_util.appendNewElements)(copyBtn,"SPAN.btn-text"),setTextToCopy=()=>this.localMessage("copy","Copy").then(msg=>{copyText.textContent=msg}),setTextToCopied=()=>this.localMessage("copied","Copied").then(msg=>{copyText.textContent=msg});setTextToCopy();const text=phrase.text;(0,_util.createClipboardButton)(copyBtn,()=>{setTextToCopied();setTimeout(()=>setTextToCopy(),3e3);return text});// pin button
 const pinningBtn=(0,_util.appendNewElements)(buttons,"SPAN.btn-img.pinned");pinningBtn.onclick=()=>this._toggleResultElementPinned(element);(0,_util.appendNewElements)(pinningBtn,"SPAN.btn-img");const pinningText=(0,_util.appendNewElements)(pinningBtn,"SPAN.btn-text");this.localMessage("pin","Pin").then(msg=>{pinningText.textContent=msg});// examples
 this._addResultElementOptionsExamples(options,phrase)}/**
 	 * @param {HTMLElement} options
 	 * @param {Phrase} phrase
 	 */_addResultElementOptionsExamples(options,phrase){const examplesContainer=(0,_util.appendNewElements)(options,"DIV.examples-container"),examplesList=(0,_util.appendNewElements)(examplesContainer,"div.examples-list"),loadMoreExamplesContainer=(0,_util.appendNewElements)(examplesContainer,"div.load-more-examples"),loadingIcon=(0,_util.appendNewElements)(loadMoreExamplesContainer,"SPAN.btn-img.loading");(0,_util.appendNewElements)(loadingIcon,"SPAN.btn-img");// load more button
 const button=(0,_util.appendNewElements)(loadMoreExamplesContainer,"BUTTON.load-more");(0,_util.appendNewElements)(button,"SPAN.load-more-img");button.addEventListener("click",()=>loadMoreExamples());// load examples function
-const exampleSupplier=this._createExampleSupplier(phrase,this.examplePageSize),loadMoreExamples=()=>{loadingIcon.style.display=null;button.style.display="none";exampleSupplier().then(examples=>{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=example.snippet;(0,_util.appendNewElements)(p,"A").setAttribute("href",example.source)}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("failed-to-load-examples","Failed to load examples.").then(msg=>{p.textContent=msg})})};// load examples right now.
+const exampleSupplier=this._createExampleSupplier(phrase,this.examplePageSize),loadMoreExamples=()=>{loadingIcon.style.display=null;button.style.display="none";const examplePromise=exampleSupplier();examplePromise.then(examples=>{if(!1===examples){loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("no-examples-found","No examples found.").then(msg=>{p.textContent=msg})}else{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=example.snippet;(0,_util.appendNewElements)(p,"A").setAttribute("href",example.source)}}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("failed-to-load-examples","Failed to load examples.").then(msg=>{p.textContent=msg})})};// load examples right now.
 loadMoreExamples()}/**
 	 * Returns a function which will return a new examples every time it is invoked.
 	 *
 	 * @param {Phrase} phrase
 	 * @param {number} requestCount
-	 * @returns {() => Promise<Snippet[]>}
+	 * @returns {() => Promise<Snippet[] | false>}
 	 *
 	 * @typedef {{ snippet: string; source: string }} Snippet
 	 */_createExampleSupplier(phrase,requestCount){const pastExamples=new Set([""]),snippetsBuffer=[];/** @type {Snippet[]} */let internalPage=0,internalPageSize=100;const snippetsApi=this.snippetsApi;let startTime=-1;const timeout=5e3;// ms
-/**
-		 * @returns {Promise<Snippet[]>}
+// whether the snippet API doesn't have any more examples
+let noFurtherExamples=!1;/**
+		 * @returns {Promise<Snippet[] | false>}
 		 */function loadSnippets(){if(snippetsBuffer.length>=requestCount){return Promise.resolve(snippetsBuffer.splice(0,requestCount))}if(0<snippetsBuffer.length&&new Date().valueOf()-startTime>timeout){// return all of them early if we take too long
-return Promise.resolve(snippetsBuffer.splice(0,snippetsBuffer.length))}// load and buffer snippets
-return snippetsApi.search({query:phrase.text,size:internalPageSize,from:internalPageSize*internalPage++}).then(res=>{for(const _ref of res.results){const{snippet,target_uri}=_ref,text=(0,_util.textContent)(snippet).toLowerCase();if(-1===text.indexOf(phrase.text.toLowerCase()))continue;// The basic idea behind this id is that most duplicate examples are equal character for character,
+return Promise.resolve(snippetsBuffer.splice(0,snippetsBuffer.length))}if(noFurtherExamples){if(snippetsBuffer.length){return Promise.resolve(snippetsBuffer.splice(0,snippetsBuffer.length))}else{return Promise.resolve(!1)}}// load and buffer snippets
+return snippetsApi.search({query:phrase.text,size:internalPageSize,from:internalPageSize*internalPage++}).then(res=>{if(0===res.results.length){noFurtherExamples=!0}for(const _ref of res.results){const{snippet,target_uri}=_ref,text=(0,_util.textContent)(snippet).toLowerCase();if(-1===text.indexOf(phrase.text.toLowerCase()))continue;// The basic idea behind this id is that most duplicate examples are equal character for character,
 // so a simple (and fast) hash lookup is sufficient.
 // To also filter duplicates which are technically different but don't look very different to
 // humans, some additional transformation are performed.
