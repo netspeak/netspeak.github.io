@@ -10,9 +10,9 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,
 
 			#content {
 				max-width: 800px;
-				padding: 19px 16px;
+				padding: 19px 0;
 				box-sizing: border-box;
-				margin: 0 auto;
+				margin: 0 64px;
 			}
 
 			#logo {
@@ -37,7 +37,7 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,
 				padding-left: 16px;
 			}
 
-			@media screen and (max-width: 750px) {
+			@media screen and (max-width: 500px) {
 
 				:host {
 					height: 48px;

@@ -1,4 +1,4 @@
-define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.encode=encode;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;_exports.startClickableSearchBars=startClickableSearchBars;/**
+define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.encode=encode;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;_exports.createClipboardButton=createClipboardButton;/**
  *
  * @param {T | T[]} value
  * @returns {T[]}
@@ -89,6 +89,11 @@ return result}/**
  *
  * @readonly
  * @type {string[]}
- */const regularTagNames=["style","script","link","div","span","a","h3","h4","h5","h6","br","p","b","i","img","em","strong","button","input","option","table","tr","td","th","ul","ol","li","iframe","th","pre","code"],irregularTagSelector="*"+regularTagNames.map(e=>":not("+e+")").join("");function startScrollToUrlHash(){/** @type {string | null} */let lastHash=null,lastElement=null;/** @type {HTMLElement | null} */setInterval(()=>{const hash=location.hash.replace(/^#/,"");if(hash!==lastHash||!lastElement){lastElement=null;if(hash){lastElement=shadyQuerySelector(document,"#"+hash);if(lastElement){lastElement.scrollIntoView()}}}lastHash=hash},16)}let clickableStarted=!1;/**
- * Starts a process which will set all Netspeak search bars to clickable (mobile mode) depending on the page size.
- */function startClickableSearchBars(){function updateClickablity(){const clickableItems=500>=window.innerWidth,searchBars=shadyQuerySelectorAll(document,"netspeak-search-bar");/** @type {import("./netspeak-search-bar").NetspeakSearchBar[]} */for(const searchBar of searchBars){searchBar.clickableItems=clickableItems}}updateClickablity();if(clickableStarted)return;clickableStarted=!0;window.addEventListener("resize",updateClickablity)}});
+ */const regularTagNames=["style","script","link","div","span","a","h3","h4","h5","h6","br","p","b","i","img","em","strong","button","input","option","table","tr","td","th","ul","ol","li","iframe","th","pre","code"],irregularTagSelector="*"+regularTagNames.map(e=>":not("+e+")").join("");function startScrollToUrlHash(){/** @type {string | null} */let lastHash=null,lastElement=null;/** @type {HTMLElement | null} */setInterval(()=>{const hash=location.hash.replace(/^#/,"");if(hash!==lastHash||!lastElement){lastElement=null;if(hash){lastElement=shadyQuerySelector(document,"#"+hash);if(lastElement){lastElement.scrollIntoView()}}}lastHash=hash},16)}/**
+ * Creates a new ClipboardJS instance and returns a promise according to the `success` or `error` event.
+ *
+ * @param {string | Element} selector
+ * @param {string | ((elem: Element) => string)} text
+ * @returns {Promise<import("clipboard")>}
+ */function createClipboardButton(selector,text){if("undefined"===typeof ClipboardJS){// load the library
+return new Promise((resolve,reject)=>{const script=document.createElement("script");script.async=!0;script.src="https://unpkg.com/clipboard@2/dist/clipboard.min.js";script.onload=()=>{document.body.removeChild(script);resolve()};script.onerror=()=>{document.body.removeChild(script);reject()};document.body.appendChild(script)}).then(()=>{if("undefined"===typeof ClipboardJS){throw new Error("Unable to load ClipboardJS")}}).then(()=>{return createClipboardButton(selector,text)})}return Promise.resolve(new ClipboardJS(selector,{text(e){if("function"===typeof text){return text(e)}else{return text}}}))}});

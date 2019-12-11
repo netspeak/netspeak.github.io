@@ -29,7 +29,7 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./snippets.js"
 			background-color: transparent;
 			border: none;
 			cursor: pointer;
-			display: block;
+			display: inline-block;
 			margin: 0;
 			opacity: .5;
 			padding: var(--icon-padding, 4px);
@@ -45,17 +45,24 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./snippets.js"
 			background-position: center;
 			background-repeat: no-repeat;
 			background-size: contain;
-			display: block;
-			margin: auto;
+			display: inline-block;
+			margin: 0;
 			padding: 0;
 			width: var(--icon-size, 16px);
 			height: var(--icon-size, 16px);
 		}
 
+		.btn-img>span.btn-text {
+			display: inline-block;
+			line-height: var(--icon-size, 16px);
+			padding: 0;
+			vertical-align: top;
+		}
+
 	</style>
 `;/**
  * The Netspeak search bar can query and display phrases queried using the Netspeak API.
- */class NetspeakSearchBar extends _netspeakElement.NetspeakElement{static get is(){return"netspeak-search-bar"}static get properties(){return{query:{type:String,value:"",observer:"_queryChanged"},corpus:{type:String,value:_netspeak.Netspeak.defaultCorpus,notify:!0},initialLimit:{type:Number,value:40},readonly:{type:Boolean,value:!1},slowSearch:{type:Boolean,value:!1},initialExamplesLimit:{type:Number,value:6},historyHidden:{type:Boolean,value:!1,notify:!0,observer:"_historyHiddenChanged"},infoVisibleByDefault:{type:Boolean,value:!1,notify:!0},clickableItems:{type:Boolean,value:!1,notify:!0}}}static get template(){return _netspeakElement.html`
+ */class NetspeakSearchBar extends _netspeakElement.NetspeakElement{static get is(){return"netspeak-search-bar"}static get properties(){return{query:{type:String,value:"",observer:"_queryChanged"},corpus:{type:String,value:_netspeak.Netspeak.defaultCorpus,notify:!0},initialLimit:{type:Number,value:40},readonly:{type:Boolean,value:!1},slowSearch:{type:Boolean,value:!1},initialExamplesLimit:{type:Number,value:6},historyHidden:{type:Boolean,value:!1,notify:!0,observer:"_historyHiddenChanged"},infoVisibleByDefault:{type:Boolean,value:!1,notify:!0}}}static get template(){return _netspeakElement.html`
 		${sharedStyles}
 
 		<style>
@@ -175,6 +182,7 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./snippets.js"
 				display: block;
 				padding: 1em 2em;
 				margin: 0;
+				word-break: break-word;
 			}
 
 			/*
@@ -242,7 +250,7 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./snippets.js"
 	 * Creates a new instance of NetspeakSearchBar.
 	 *
 	 */constructor(){super();this.netspeakApi=_netspeak.Netspeak.getInstance();this._queriedPhrases=new _netspeak.PhraseCollection;// for typing purposes
-/** @type {string} */this.query=this.query;/** @type {string} */this.corpus=this.corpus;/** @type {number} */this.initialLimit=this.initialLimit;/** @type {boolean} */this.readonly=this.readonly;/** @type {boolean} */this.slowSearch=this.slowSearch;/** @type {number} */this.initialExamplesLimit=this.initialExamplesLimit;/** @type {boolean} */this.historyHidden=this.historyHidden;/** @type {boolean} */this.infoVisibleByDefault=this.infoVisibleByDefault;/** @type {boolean} */this.clickableItems=this.clickableItems;this.addEventListener("clickable-items-changed",()=>{if(this._resultList){this._resultList.clickableItems=this.clickableItems}})}/**
+/** @type {string} */this.query=this.query;/** @type {string} */this.corpus=this.corpus;/** @type {number} */this.initialLimit=this.initialLimit;/** @type {boolean} */this.readonly=this.readonly;/** @type {boolean} */this.slowSearch=this.slowSearch;/** @type {number} */this.initialExamplesLimit=this.initialExamplesLimit;/** @type {boolean} */this.historyHidden=this.historyHidden;/** @type {boolean} */this.infoVisibleByDefault=this.infoVisibleByDefault}/**
 	 * The method called after the element was added to the DOM.
 	 */connectedCallback(){super.connectedCallback();/** @type {HTMLInputElement} */this._queryInputElement=this.shadowRoot.querySelector("#query-input");/** @type {HTMLButtonElement} */this._exampleQueriesButton=this.shadowRoot.querySelector("#example-queries-button");/** @type {HTMLButtonElement} */this._clearButton=this.shadowRoot.querySelector("#clear-button");/** @type {HTMLButtonElement} */this._historyButton=this.shadowRoot.querySelector("#history-button");/** @type {import("./netspeak-example-queries").NetspeakExampleQueries} */this._exampleQueries=this.shadowRoot.querySelector("netspeak-example-queries");/** @type {NetspeakSearchBarResultList} */this._resultList=this.shadowRoot.querySelector("netspeak-search-bar-result-list");this._historyHiddenChanged(this.historyHidden);this._resultList.addEventListener("load-more",()=>this._loadMoreItems());this._exampleQueries.addEventListener("query-selected",e=>{// @ts-ignore
 this.query=e.detail.query});this._setExampleQueriesVisibility(this.infoVisibleByDefault)}/**
@@ -302,17 +310,28 @@ container.querySelector("#drop-down").blur()}}}/**
  * - Notifying that more phrases are requested
  * - Pinning phrases
  * - Querying and displaying examples
- */_exports.NetspeakSearchBar=NetspeakSearchBar;class NetspeakSearchBarResultList extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-search-bar-result-list"}static get properties(){return{showLoadMore:{type:Boolean,notify:!0},phrases:{type:Array,notify:!0},formatter:{type:PhraseFormatter,notify:!0},clickableItems:{type:Boolean,notify:!0}}}static get template(){return _netspeakElement.html`
+ */_exports.NetspeakSearchBar=NetspeakSearchBar;class NetspeakSearchBarResultList extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-search-bar-result-list"}static get properties(){return{showLoadMore:{type:Boolean,notify:!0},phrases:{type:Array,notify:!0},formatter:{type:PhraseFormatter,notify:!0}}}static get template(){return _netspeakElement.html`
 		${sharedStyles}
 
 		<style>
 
-			#result-list>div {
-				background-color: #FFF;
+			*::-moz-selection {
+				text-shadow: none !important;
+				background-color: rgba(32, 64, 255, .8);
+				color: #FFF;
+			}
+			*::selection {
+				text-shadow: none !important;
+				background-color: rgba(32, 64, 255, .8);
+				color: #FFF;
 			}
 
-			#result-list>div:first-child {
-				border-top: none;
+
+			#result-list>div {
+				background-color: var(--item-background-color);
+				display: table;
+				width: 100%;
+				padding: 0;
 			}
 
 			#result-list>div:nth-child(2n) {
@@ -325,37 +344,34 @@ container.querySelector("#drop-down").blur()}}}/**
 			#result-list>div:hover {
 				--item-background-color: #e2ebf1;
 			}
-			#result-list>div {
-				background-color: var(--item-background-color);
-			}
-
-			#result-list>div div.options {
-				background: rgb(247, 247, 247);
-				border-bottom: 1px solid #CCC;
-				border-top: 1px solid #CCC;
-				position: relative;
-			}
-			#result-list>div:last-child div.options {
-				border-bottom: none;
-			}
 
 
-			#result-list table {
-				padding: 0 var(--left-right-padding);
-				width: 100%;
-			}
+			/**
+			 * div.phrase-container
+			 */
 
-			#result-list table td:first-child {
-				width: 100%;
+			#result-list .phrase-container {
 				background-repeat: no-repeat;
 				background-position-x: calc(100% + 1px);
+				background-position-y: -2px;
 				background-image: url("/src/img/frequency-bar.svg");
+
+				cursor: pointer;
+				padding: 0 var(--left-right-padding);
+				width: 100%;
+				box-sizing: border-box;
 			}
+			#result-list .phrase-container::after {
+				content: "";
+				clear: both;
+				display: block;
+			}
+
 
 			#result-list span.text,
 			#result-list span.freq {
 				text-shadow: 0 1px 1px #FFF;
-				padding: var(--result-item-data-text-padding, .25em .5em);
+				padding: .3em .5em;
 			}
 
 			#result-list span.text {
@@ -370,25 +386,8 @@ container.querySelector("#drop-down").blur()}}}/**
 			#result-list span.freq>span.percentage {
 				display: inline-block;
 				padding-left: .5em;
-				width: 3.5em;
+				width: 4em;
 			}
-
-
-			*::-moz-selection {
-				text-shadow: none !important;
-				background-color: rgba(32, 64, 255, .8);
-				color: #FFF;
-			}
-
-			*::selection {
-				text-shadow: none !important;
-				background-color: rgba(32, 64, 255, .8);
-				color: #FFF;
-			}
-
-			/*
-			 * SYNTAX HIGHLIGHTING
-			 */
 
 			#result-list span.text span {
 				color: #333;
@@ -409,83 +408,111 @@ container.querySelector("#drop-down").blur()}}}/**
 				color: #2d7db3;
 			}
 
-			/*
-			 * PIN
+
+			/**
+			 * div.options
 			 */
+
+			#result-list .options {
+				background: rgb(247, 247, 247);
+				border-bottom: 1px solid #CCC;
+				border-top: 1px solid #CCC;
+				color: #444;
+
+				position: relative;
+			}
+			#result-list>div:last-child .options {
+				border-bottom: none;
+			}
+
+
+			/*
+			 * div.buttons
+			 */
+
+			#result-list .options .buttons {
+				text-align: right;
+				margin: .25em var(--left-right-padding);
+			}
 
 			#result-list .pinned>span.btn-img {
 				background-image: url("/src/img/pin.svg");
 			}
-
 			#result-list [pinned] .pinned {
 				opacity: 1;
 			}
+
+			#result-list .copy>span.btn-img {
+				background-image: url("/src/img/copy.svg");
+			}
+
 
 			/*
 			 * EXAMPLES
 			 */
 
-			#result-list .examples>span.btn-img {
-				background-image: url("/src/img/plus.svg");
-			}
-
-			#result-list [options-visible] .examples>span.btn-img {
-				background-image: url("/src/img/minus.svg");
-			}
-
 			#result-list .loading {
 				cursor: default;
 				opacity: 1;
 			}
-
 			#result-list .loading>span.btn-img {
+				animation-name: show-via-opacity;
+				animation-duration: 1s;
 				background-image: url("/src/img/loading.svg");
 			}
+			@keyframes show-via-opacity {
+				from {
+					opacity: 0;
+				}
 
+				20% {
+					opacity: 0;
+				}
 
-			#result-list div.options {
-				padding: 1em;
-				background-color: var(--options-background-color);
-				color: #444;
+				to {
+					opacity: 100%;
+				}
 			}
 
-			#result-list [options-visible] div.options {
-				display: block;
+			#result-list .options .examples-container {
+				padding: 0 1em 1em 1em;
 			}
-
-
-			#result-list div.options .examples-list {
+			#result-list .options .examples-list {
 				font-size: 90%;
 				word-break: break-word;
 			}
+			#result-list .options .load-more-examples {
+				text-align: center;
+			}
 
-			#result-list div.options .examples-list em {
+			#result-list .options .examples-list em {
 				font-weight: bold;
 			}
 
-			#result-list div.options .examples-list a {
+			#result-list .options .examples-list a {
 				color: inherit;
 				opacity: .7;
 				padding: 0 .5em;
 			}
 
-			#result-list div.options .examples-list a::after {
+			#result-list .options .examples-list a::after {
 				content: "\\21F1";
 				display: inline-block;
 				transform: rotate(90deg);
 			}
 
-			#result-list div.options .load-more {
+			#result-list .options .load-more {
 				cursor: pointer;
 				display: block;
 				position: relative;
 				width: 100%;
 			}
 
-			#result-list div.options .load-more>* {
+			#result-list .options .load-more>* {
 				margin-left: auto;
 				margin-top: auto;
 			}
+
 
 			/*
 			 * LOAD MORE
@@ -505,10 +532,11 @@ container.querySelector("#drop-down").blur()}}}/**
 				background-color: #EEE;
 			}
 
+			/* These are for both the result list load-more button and the examples load-more buttons */
+
 			*:hover>span.load-more-img {
 				opacity: 1;
 			}
-
 			span.load-more-img {
 				opacity: .5;
 				display: block;
@@ -522,22 +550,6 @@ container.querySelector("#drop-down").blur()}}}/**
 				background-image: url('/src/img/load-more.svg');
 			}
 
-			/*
-			 * Clickability changes
-			 */
-
-			#result-list.clickable table {
-				cursor: pointer;
-				padding: 0;
-			}
-			#result-list.clickable table td:first-child {
-				padding: 0 var(--left-right-padding);
-				height: calc(var(--icon-size) + 2 * var(--icon-padding));
-			}
-			#result-list.clickable table tr td:not(:first-child) {
-				display: none;
-			}
-
 		</style>
 
 		<div id="result-list"></div>
@@ -545,7 +557,7 @@ container.querySelector("#drop-down").blur()}}}/**
 		<button id="load-more-button" style="display: none;">
 			<span class="load-more-img"></span>
 		</button>
-		`}get isEmpty(){return 0===this.pinnedPhrases.size+this.phrases.length}constructor(){super();this.showLoadMore=!1;this.examplePageSize=6;/** @type {Phrase[]} */this.phrases=[];/** @type {Map<string, Phrase>} */this.pinnedPhrases=new Map;/** @type {boolean} */this.clickableItems=this.clickableItems;this.snippetsApi=_snippets.Snippets.getInstance();this.formatter=PhraseFormatter.getInstance();this.invalidate=(0,_util.createNextFrameInvoker)(()=>this._render());this.addEventListener("phrases-changed",()=>this.invalidate());this.addEventListener("formatter-changed",()=>this.invalidate())}connectedCallback(){super.connectedCallback();/** @type {HTMLElement} */this._resultList=this.shadowRoot.querySelector("#result-list");/** @type {HTMLElement} */this._loadMore=this.shadowRoot.querySelector("#load-more-button");this.addEventListener("show-load-more-changed",()=>{if(this._loadMore){this._loadMore.style.display=this.showLoadMore?"block":"none"}});this._loadMore.addEventListener("click",()=>{this.dispatchEvent(new CustomEvent("load-more",{bubbles:!1,cancelable:!1}))});this.addEventListener("clickable-items-changed",()=>this._updateClickability());this._updateClickability()}_updateClickability(){if(!this._resultList)return;if(this.clickableItems){this._resultList.classList.add("clickable")}else{this._resultList.classList.remove("clickable")}}clear(){this.phrases=[];this.pinnedPhrases.clear();this.showLoadMore=!1;this.invalidate()}_render(){if(!this.isConnected)return;const collection=new NewPhraseCollection(this._getAllPhrasesToRender()),existingElementPhraseIdsSet=new Set;// update or delete current DOM elements
+		`}get isEmpty(){return 0===this.pinnedPhrases.size+this.phrases.length}constructor(){super();this.showLoadMore=!1;this.examplePageSize=6;/** @type {Phrase[]} */this.phrases=[];/** @type {Map<string, Phrase>} */this.pinnedPhrases=new Map;this.snippetsApi=_snippets.Snippets.getInstance();this.formatter=PhraseFormatter.getInstance();this.invalidate=(0,_util.createNextFrameInvoker)(()=>this._render());this.addEventListener("phrases-changed",()=>this.invalidate());this.addEventListener("formatter-changed",()=>this.invalidate())}connectedCallback(){super.connectedCallback();/** @type {HTMLElement} */this._resultList=this.shadowRoot.querySelector("#result-list");/** @type {HTMLElement} */this._loadMore=this.shadowRoot.querySelector("#load-more-button");this.addEventListener("show-load-more-changed",()=>{if(this._loadMore){this._loadMore.style.display=this.showLoadMore?"block":"none"}});this._loadMore.addEventListener("click",()=>{this.dispatchEvent(new CustomEvent("load-more",{bubbles:!1,cancelable:!1}))})}clear(){this.phrases=[];this.pinnedPhrases.clear();this.showLoadMore=!1;this.invalidate()}_render(){if(!this.isConnected)return;const collection=new NewPhraseCollection(this._getAllPhrasesToRender()),existingElementPhraseIdsSet=new Set;// update or delete current DOM elements
 for(let i=this._resultList.children.length-1;0<=i;i--){const element=/** @type {HTMLElement} */this._resultList.children[i],elementPhrase=this._getResultElementPhrase(element);if(!elementPhrase){// delete
 element.remove();continue}const mapEntry=collection.byId(elementPhrase.id);if(mapEntry){// update
 existingElementPhraseIdsSet.add(elementPhrase.id);this._setResultElementPinned(element,elementPhrase);this._setResultElementStats(element,elementPhrase,collection)}else{// delete
@@ -556,28 +568,34 @@ for(const phrase of collection){if(!existingElementPhraseIdsSet.has(phrase.id)){
 	 * @param {Phrase} phrase
 	 * @param {NewPhraseCollection} collection
 	 * @returns {HTMLElement}
-	 */_createResultElement(phrase,collection){const element=document.createElement("div");this._setResultElementPhrase(element,phrase);const table=(0,_util.appendNewElements)(element,"TABLE");table.addEventListener("click",()=>{if(this.clickableItems){this._toggleResultElementOptions(element)}});const tr=(0,_util.appendNewElements)(table,"TBODY","TR"),td=(0,_util.appendNewElements)(tr,"TD");(0,_util.appendNewElements)(td,"DIV","SPAN.text");(0,_util.appendNewElements)(td,"SPAN.freq");const examplesBtn=(0,_util.appendNewElements)(tr,"TD","SPAN.btn-img.examples");examplesBtn.onclick=()=>this._toggleResultElementOptions(element);(0,_util.appendNewElements)(examplesBtn,"SPAN.btn-img");const pinningBtn=(0,_util.appendNewElements)(tr,"TD","SPAN.btn-img.pinned");pinningBtn.onclick=()=>this._toggleResultElementPinned(element);(0,_util.appendNewElements)(pinningBtn,"SPAN.btn-img");this._setResultElementStats(element,phrase,collection);return element}_toggleResultElementPinned(element){const phrase=this._getResultElementPhrase(element);if(this.pinnedPhrases.has(phrase.id)){this.pinnedPhrases.delete(phrase.id)}else{this.pinnedPhrases.set(phrase.id,phrase)}this._setResultElementPinned(element,phrase)}/**
+	 */_createResultElement(phrase,collection){const element=document.createElement("div");this._setResultElementPhrase(element,phrase);const phraseContainer=(0,_util.appendNewElements)(element,"div.phrase-container");phraseContainer.addEventListener("click",()=>{this._toggleResultElementOptions(element)});(0,_util.appendNewElements)(phraseContainer,"div","span.text");(0,_util.appendNewElements)(phraseContainer,"span.freq");this._setResultElementStats(element,phrase,collection);return element}_toggleResultElementPinned(element){const phrase=this._getResultElementPhrase(element);if(this.pinnedPhrases.has(phrase.id)){this.pinnedPhrases.delete(phrase.id)}else{this.pinnedPhrases.set(phrase.id,phrase)}this._setResultElementPinned(element,phrase)}/**
 	 * @param {HTMLElement} element
 	 */_toggleResultElementOptions(element){/** @type {HTMLElement} */const options=element.querySelector(".options");if(!options){this._addResultElementOptions(element);element.setAttribute("options-visible","")}else{const visible="none"!==options.style.display;if(visible){options.style.display="none";element.removeAttribute("options-visible")}else{options.style.display="block";element.setAttribute("options-visible","")}}}/**
 	 * @param {HTMLElement} element
-	 * @returns {HTMLElement}
-	 */_addResultElementOptions(element){const phrase=this._getResultElementPhrase(element),options=(0,_util.appendNewElements)(element,"DIV.options"),examplesContainer=(0,_util.appendNewElements)(options,"DIV.examples-container"),examplesList=(0,_util.appendNewElements)(examplesContainer,"div.examples-list"),loadMoreExamplesContainer=(0,_util.appendNewElements)(examplesContainer,"div.load-more-examples"),loadingIcon=(0,_util.appendNewElements)(loadMoreExamplesContainer,"SPAN.btn-img.loading");(0,_util.appendNewElements)(loadingIcon,"SPAN.btn-img");// load more button
+	 */_addResultElementOptions(element){const phrase=this._getResultElementPhrase(element),options=(0,_util.appendNewElements)(element,"DIV.options"),buttons=(0,_util.appendNewElements)(options,"div.buttons"),copyBtn=(0,_util.appendNewElements)(buttons,"SPAN.btn-img.copy");//copyBtn.onclick = () => console.log(`Copy "${phrase.text}"`);
+(0,_util.appendNewElements)(copyBtn,"SPAN.btn-img");const copyText=(0,_util.appendNewElements)(copyBtn,"SPAN.btn-text"),setTextToCopy=()=>this.localMessage("copy","Copy").then(msg=>{copyText.textContent=msg}),setTextToCopied=()=>this.localMessage("copied","Copied").then(msg=>{copyText.textContent=msg});setTextToCopy();const text=phrase.text;(0,_util.createClipboardButton)(copyBtn,()=>{setTextToCopied();setTimeout(()=>setTextToCopy(),3e3);return text});// pin button
+const pinningBtn=(0,_util.appendNewElements)(buttons,"SPAN.btn-img.pinned");pinningBtn.onclick=()=>this._toggleResultElementPinned(element);(0,_util.appendNewElements)(pinningBtn,"SPAN.btn-img");const pinningText=(0,_util.appendNewElements)(pinningBtn,"SPAN.btn-text");this.localMessage("pin","Pin").then(msg=>{pinningText.textContent=msg});// examples
+this._addResultElementOptionsExamples(options,phrase)}/**
+	 * @param {HTMLElement} options
+	 * @param {Phrase} phrase
+	 */_addResultElementOptionsExamples(options,phrase){const examplesContainer=(0,_util.appendNewElements)(options,"DIV.examples-container"),examplesList=(0,_util.appendNewElements)(examplesContainer,"div.examples-list"),loadMoreExamplesContainer=(0,_util.appendNewElements)(examplesContainer,"div.load-more-examples"),loadingIcon=(0,_util.appendNewElements)(loadMoreExamplesContainer,"SPAN.btn-img.loading");(0,_util.appendNewElements)(loadingIcon,"SPAN.btn-img");// load more button
 const button=(0,_util.appendNewElements)(loadMoreExamplesContainer,"BUTTON.load-more");(0,_util.appendNewElements)(button,"SPAN.load-more-img");button.addEventListener("click",()=>loadMoreExamples());// load examples function
-const exampleSupplier=this._createExampleSupplier(phrase,this.examplePageSize),loadMoreExamples=()=>{loadingIcon.style.display=null;button.style.display="none";exampleSupplier().then(examples=>{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=example.snippet;(0,_util.appendNewElements)(p,"A").setAttribute("href",example.source)}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("failed-to-load-examples","Failed to load examples.").then(msg=>{p.textContent=msg})})};// load examples right now.
-loadMoreExamples();return options}/**
+const exampleSupplier=this._createExampleSupplier(phrase,this.examplePageSize),loadMoreExamples=()=>{loadingIcon.style.display=null;button.style.display="none";const examplePromise=exampleSupplier();examplePromise.then(examples=>{if(!1===examples){loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("no-examples-found","No examples found.").then(msg=>{p.textContent=msg})}else{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=example.snippet;(0,_util.appendNewElements)(p,"A").setAttribute("href",example.source)}}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("failed-to-load-examples","Failed to load examples.").then(msg=>{p.textContent=msg})})};// load examples right now.
+loadMoreExamples()}/**
 	 * Returns a function which will return a new examples every time it is invoked.
 	 *
 	 * @param {Phrase} phrase
 	 * @param {number} requestCount
-	 * @returns {() => Promise<Snippet[]>}
+	 * @returns {() => Promise<Snippet[] | false>}
 	 *
 	 * @typedef {{ snippet: string; source: string }} Snippet
 	 */_createExampleSupplier(phrase,requestCount){const pastExamples=new Set([""]),snippetsBuffer=[];/** @type {Snippet[]} */let internalPage=0,internalPageSize=100;const snippetsApi=this.snippetsApi;let startTime=-1;const timeout=5e3;// ms
-/**
-		 * @returns {Promise<Snippet[]>}
+// whether the snippet API doesn't have any more examples
+let noFurtherExamples=!1;/**
+		 * @returns {Promise<Snippet[] | false>}
 		 */function loadSnippets(){if(snippetsBuffer.length>=requestCount){return Promise.resolve(snippetsBuffer.splice(0,requestCount))}if(0<snippetsBuffer.length&&new Date().valueOf()-startTime>timeout){// return all of them early if we take too long
-return Promise.resolve(snippetsBuffer.splice(0,snippetsBuffer.length))}// load and buffer snippets
-return snippetsApi.search({query:phrase.text,size:internalPageSize,from:internalPageSize*internalPage++}).then(res=>{for(const _ref of res.results){const{snippet,target_uri}=_ref,text=(0,_util.textContent)(snippet).toLowerCase();if(-1===text.indexOf(phrase.text.toLowerCase()))continue;// The basic idea behind this id is that most duplicate examples are equal character for character,
+return Promise.resolve(snippetsBuffer.splice(0,snippetsBuffer.length))}if(noFurtherExamples){if(snippetsBuffer.length){return Promise.resolve(snippetsBuffer.splice(0,snippetsBuffer.length))}else{return Promise.resolve(!1)}}// load and buffer snippets
+return snippetsApi.search({query:phrase.text,size:internalPageSize,from:internalPageSize*internalPage++}).then(res=>{if(0===res.results.length){noFurtherExamples=!0}for(const _ref of res.results){const{snippet,target_uri}=_ref,text=(0,_util.textContent)(snippet).toLowerCase();if(-1===text.indexOf(phrase.text.toLowerCase()))continue;// The basic idea behind this id is that most duplicate examples are equal character for character,
 // so a simple (and fast) hash lookup is sufficient.
 // To also filter duplicates which are technically different but don't look very different to
 // humans, some additional transformation are performed.
@@ -591,7 +609,7 @@ if(!pastExamples.has(id)){pastExamples.add(id);snippetsBuffer.push({snippet:snip
 	 * @param {HTMLElement} element
 	 * @param {Phrase} phrase
 	 * @param {NewPhraseCollection} collection
-	 */_setResultElementStats(element,phrase,collection){const td=element.querySelector("td"),relativeFreq=phrase.frequency/collection.maxFrequency;td.style.backgroundSize=`${100*(.618*relativeFreq)}% 100%`;const text=this.formatter.formatText(phrase,collection),freq=this.formatter.formatFrequency(phrase,collection),percent=this.formatter.formatPercentage(phrase,collection);td.querySelector(".text").innerHTML=text;td.querySelector(".freq").innerHTML=`${freq}<span class="percentage">${percent}</span>`}/**
+	 */_setResultElementStats(element,phrase,collection){/** @type {HTMLDivElement} */const phraseContainer=element.querySelector(".phrase-container"),relativeFreq=phrase.frequency/collection.maxFrequency;phraseContainer.style.backgroundSize=`${100*(.618*relativeFreq)}% 130%`;const text=this.formatter.formatText(phrase,collection),freq=this.formatter.formatFrequency(phrase,collection),percent=this.formatter.formatPercentage(phrase,collection);phraseContainer.querySelector(".text").innerHTML=text;phraseContainer.querySelector(".freq").innerHTML=`${freq}<span class="percentage">${percent}</span>`}/**
 	 * Inserts the given element into the result list.
 	 *
 	 * @param {HTMLElement} element
