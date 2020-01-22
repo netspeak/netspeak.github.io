@@ -39,7 +39,7 @@ resolve(buffer.splice(0,count))}else if(empty){resolveWhenEmpty(resolve)}else{pe
 	 *
 	 * @param {string} phrase
 	 * @param {number} count
-	 */_createSuppliers(phrase,count){/** @type {SnippetSupplier[]} */const suppliers=[];this.backends.forEach(config=>{/** @type {number | undefined} */let supplierCount=void 0;if(config.getCount){supplierCount=config.getCount(count)}else{supplierCount=count}let supplier=config.backend.getSupplier(phrase,supplierCount);supplier=this._makeTimeoutSupplier(supplier,config.timeout||this.defaultTimeout);supplier=this._makeNonRejectingSupplier(supplier);for(let i=config.parallel||1;0<i;i--){suppliers.push(supplier)}});return suppliers}/**
+	 */_createSuppliers(phrase,count){/** @type {SnippetSupplier[]} */const suppliers=[];this.backends.forEach(config=>{/** @type {number | undefined} */let supplierCount=void 0;if(config.getCount){supplierCount=config.getCount(count)}else{supplierCount=count}let supplier=config.backend.getSupplier(phrase,supplierCount);supplier=this._makeTimeoutSupplier(supplier,config.timeout||this.defaultTimeout);supplier=this._makeNonRejectingSupplier(supplier);let parallel=config.parallel;if(parallel==void 0)parallel=1;for(let i=parallel;0<i;i--){suppliers.push(supplier)}});return suppliers}/**
 	 * Adds a timeout to the given supplier.
 	 *
 	 * If the given supplier takes longer than the specified timeout, it's assumed that the supplier could not find
@@ -48,12 +48,12 @@ resolve(buffer.splice(0,count))}else if(empty){resolveWhenEmpty(resolve)}else{pe
 	 * @param {SnippetSupplier} supplier
 	 * @param {number} timeout
 	 * @returns {SnippetSupplier}
-	 */_makeTimeoutSupplier(supplier,timeout){if(timeout===1/0)return supplier;let dead=!1;return()=>{if(dead){return Promise.resolve(!1)}/** @type {Promise<false>} */const timeoutPromise=new Promise(resolve=>{setTimeout(()=>{dead=!0;resolve(!1)},timeout)});return Promise.race([supplier(),timeoutPromise])}}/**
+	 */_makeTimeoutSupplier(supplier,timeout){if(timeout===1/0)return supplier;let dead=!1;return()=>{if(dead){return Promise.resolve(!1)}let raceIsOver=!1;/** @type {Promise<false>} */const timeoutPromise=new Promise(resolve=>{setTimeout(()=>{if(!raceIsOver){dead=!0;resolve(!1)}},timeout)});return Promise.race([supplier(),timeoutPromise]).then(x=>{raceIsOver=!0;return x},x=>{raceIsOver=!0;throw x})}}/**
 	 * Returns a new supplier based on the given supplier which will return `false` instead of rejecting.
 	 *
 	 * @param {SnippetSupplier} supplier
 	 * @returns {SnippetSupplier}
-	 */_makeNonRejectingSupplier(supplier){return()=>supplier().catch(e=>{console.log(e);return!1})}/**
+	 */_makeNonRejectingSupplier(supplier){let rejected=!1;return()=>{if(rejected)return Promise.resolve(!1);return supplier().catch(e=>{console.log(e);rejected=!0;return!1})}}/**
 	 *
 	 * @param {string} phrase
 	 * @returns {(snippet: Snippet) => boolean}
@@ -149,4 +149,4 @@ const maxResults=Math.min(count,40),q=encodeURIComponent(`"${(0,_util.normalizeS
 			 * @typedef GoogleBooksJsonItemSearchInfo
 			 * @property {string} textSnippet
 			 */const promise=fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&startIndex=${currentIndex}&maxResults=${maxResults}`).then(res=>res.json());return promise.then(json=>{if("error"in json){throw new Error(json.error.message)}const items=json.items;if(!items){done=!0;return!1}/** @type {Snippet[]} */const snippets=[];items.forEach(item=>{const url=item.volumeInfo.previewLink;// we use 3 parts of every result
-if(item.volumeInfo){if(item.volumeInfo.title)snippets.push({text:(0,_util.normalizeSpaces)((0,_util.textContent)(item.volumeInfo.title)),url});if(item.volumeInfo.description)snippets.push({text:(0,_util.normalizeSpaces)((0,_util.textContent)(item.volumeInfo.description)),url})}if(item.searchInfo&&item.searchInfo.textSnippet)snippets.push({text:(0,_util.normalizeSpaces)((0,_util.textContent)(item.searchInfo.textSnippet)),url})});return snippets})}}}_exports.GoogleBooksSnippetBackend=GoogleBooksSnippetBackend;const DEFAULT_SNIPPETS=new Snippets;_exports.DEFAULT_SNIPPETS=DEFAULT_SNIPPETS;DEFAULT_SNIPPETS.backends.push({backend:new NetspeakSnippetsBackend,parallel:3,getCount:()=>33},{backend:new GoogleBooksSnippetBackend,parallel:2,getCount:()=>20})});
+if(item.volumeInfo){if(item.volumeInfo.title)snippets.push({text:(0,_util.normalizeSpaces)((0,_util.textContent)(item.volumeInfo.title)),url});if(item.volumeInfo.description)snippets.push({text:(0,_util.normalizeSpaces)((0,_util.textContent)(item.volumeInfo.description)),url})}if(item.searchInfo&&item.searchInfo.textSnippet)snippets.push({text:(0,_util.normalizeSpaces)((0,_util.textContent)(item.searchInfo.textSnippet)),url})});return snippets})}}}_exports.GoogleBooksSnippetBackend=GoogleBooksSnippetBackend;const DEFAULT_SNIPPETS=new Snippets;_exports.DEFAULT_SNIPPETS=DEFAULT_SNIPPETS;DEFAULT_SNIPPETS.backends.push({backend:new NetspeakSnippetsBackend,parallel:3,getCount:()=>33},{backend:new GoogleBooksSnippetBackend,parallel:1,getCount:()=>20})});
