@@ -1,4 +1,4 @@
-define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.encode=encode;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;_exports.createClipboardButton=createClipboardButton;/**
+define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.encode=encode;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;_exports.createClipboardButton=createClipboardButton;_exports.normalizeSpaces=normalizeSpaces;_exports.createEmphasizer=createEmphasizer;/**
  *
  * @param {T | T[]} value
  * @returns {T[]}
@@ -96,4 +96,13 @@ return result}/**
  * @param {string | ((elem: Element) => string)} text
  * @returns {Promise<import("clipboard")>}
  */function createClipboardButton(selector,text){if("undefined"===typeof ClipboardJS){// load the library
-return new Promise((resolve,reject)=>{const script=document.createElement("script");script.async=!0;script.src="https://unpkg.com/clipboard@2/dist/clipboard.min.js";script.onload=()=>{document.body.removeChild(script);resolve()};script.onerror=()=>{document.body.removeChild(script);reject()};document.body.appendChild(script)}).then(()=>{if("undefined"===typeof ClipboardJS){throw new Error("Unable to load ClipboardJS")}}).then(()=>{return createClipboardButton(selector,text)})}return Promise.resolve(new ClipboardJS(selector,{text(e){if("function"===typeof text){return text(e)}else{return text}}}))}});
+return new Promise((resolve,reject)=>{const script=document.createElement("script");script.async=!0;script.src="https://unpkg.com/clipboard@2/dist/clipboard.min.js";script.onload=()=>{document.body.removeChild(script);resolve()};script.onerror=()=>{document.body.removeChild(script);reject()};document.body.appendChild(script)}).then(()=>{if("undefined"===typeof ClipboardJS){throw new Error("Unable to load ClipboardJS")}}).then(()=>{return createClipboardButton(selector,text)})}return Promise.resolve(new ClipboardJS(selector,{text(e){if("function"===typeof text){return text(e)}else{return text}}}))}/**
+ *
+ * @param {string} str
+ * @returns {string}
+ */function normalizeSpaces(str){return str.replace(/\s+/g," ").trim()}/**
+ * Creates a function which given some plain text will return HTML code where the given phrase is emphasized.
+ *
+ * @param {string} phrase
+ * @returns {(text: string) => string}
+ */function createEmphasizer(phrase){const emphasisRE=new RegExp(phrase.replace(/[\\/(){}[\]|?+*^$.]/g,"\\$&")+"|(<)|(&)","ig");return text=>{return text.replace(emphasisRE,(m,lt,amp)=>{if(lt)return"&lt;";if(amp)return"&amp;";return`<em>${encode(m)}</em>`})}}});
