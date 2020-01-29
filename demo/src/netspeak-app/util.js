@@ -1,4 +1,4 @@
-define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.encode=encode;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;_exports.createClipboardButton=createClipboardButton;_exports.normalizeSpaces=normalizeSpaces;_exports.createEmphasizer=createEmphasizer;/**
+define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.newElement=newElement;_exports.appendNewElements=appendNewElements;_exports.appendNew=appendNew;_exports.debounce=debounce;_exports.textContent=textContent;_exports.encode=encode;_exports.createNextFrameInvoker=createNextFrameInvoker;_exports.startScrollToUrlHash=startScrollToUrlHash;_exports.createClipboardButton=createClipboardButton;_exports.normalizeSpaces=normalizeSpaces;/**
  *
  * @param {T | T[]} value
  * @returns {T[]}
@@ -100,9 +100,4 @@ return new Promise((resolve,reject)=>{const script=document.createElement("scrip
  *
  * @param {string} str
  * @returns {string}
- */function normalizeSpaces(str){return str.replace(/\s+/g," ").trim()}/**
- * Creates a function which given some plain text will return HTML code where the given phrase is emphasized.
- *
- * @param {string} phrase
- * @returns {(text: string) => string}
- */function createEmphasizer(phrase){const emphasisRE=new RegExp(phrase.replace(/[\\/(){}[\]|?+*^$.]/g,"\\$&")+"|(<)|(&)","ig");return text=>{return text.replace(emphasisRE,(m,lt,amp)=>{if(lt)return"&lt;";if(amp)return"&amp;";return`<em>${encode(m)}</em>`})}}});
+ */function normalizeSpaces(str){return str.replace(/\s+/g," ").trim()}});

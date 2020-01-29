@@ -485,20 +485,17 @@ container.querySelector("#drop-down").blur()}}}/**
 				text-align: center;
 			}
 
-			#result-list .options .examples-list em {
-				font-weight: bold;
+			#result-list .options .examples-list .source {
+				padding-left: .25em;
 			}
 
-			#result-list .options .examples-list a {
+			#result-list .options .examples-list .source a {
 				color: inherit;
 				opacity: .7;
-				padding: 0 .5em;
+				text-decoration: none;
 			}
-
-			#result-list .options .examples-list a::after {
-				content: "\\21F1";
-				display: inline-block;
-				transform: rotate(90deg);
+			#result-list .options .examples-list .source a:hover {
+				text-decoration: underline;
 			}
 
 			#result-list .options .load-more {
@@ -580,8 +577,16 @@ this._addResultElementOptionsExamples(options,phrase)}/**
 	 * @param {Phrase} phrase
 	 */_addResultElementOptionsExamples(options,phrase){const examplesContainer=(0,_util.appendNewElements)(options,"DIV.examples-container"),examplesList=(0,_util.appendNewElements)(examplesContainer,"div.examples-list"),loadMoreExamplesContainer=(0,_util.appendNewElements)(examplesContainer,"div.load-more-examples"),loadingIcon=(0,_util.appendNewElements)(loadMoreExamplesContainer,"SPAN.btn-img.loading");(0,_util.appendNewElements)(loadingIcon,"SPAN.btn-img");// load more button
 const button=(0,_util.appendNewElements)(loadMoreExamplesContainer,"BUTTON.load-more");(0,_util.appendNewElements)(button,"SPAN.load-more-img");button.addEventListener("click",()=>loadMoreExamples());// load examples function
-const exampleSupplier=this.snippets.getSupplier(phrase.text,this.examplePageSize),emphasize=(0,_util.createEmphasizer)(phrase.text),loadMoreExamples=()=>{loadingIcon.style.display=null;button.style.display="none";const examplePromise=exampleSupplier();examplePromise.then(examples=>{if(!1===examples){loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("no-examples-found","No examples found.").then(msg=>{p.textContent=msg})}else{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=emphasize(example.text);const a=(0,_util.appendNewElements)(p,"A");a.setAttribute("href",example.url);a.setAttribute("target","_blank")}}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("failed-to-load-examples","Failed to load examples.").then(msg=>{p.textContent=msg})})};// load examples right now.
+const exampleSupplier=this.snippets.getSupplier(phrase.text,this.examplePageSize),emphasize=this._createEmphasizer(phrase.text,200);let didSupplyExamples=!1;const loadMoreExamples=()=>{loadingIcon.style.display=null;button.style.display="none";const examplePromise=exampleSupplier();examplePromise.then(examples=>{if(!1===examples){loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P"),i=(0,_util.appendNewElements)(p,"I");if(didSupplyExamples){this.localMessage("no-further-examples-found","No further examples found.").then(msg=>{i.textContent=msg})}else{this.localMessage("no-examples-found","No examples found.").then(msg=>{i.textContent=msg})}}else{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){didSupplyExamples=!0;// add paragraph
+const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=emphasize(example.text);// add source(s) of the example
+for(const name in example.urls){const element=example.urls[name],span=(0,_util.appendNewElements)(p,"SPAN.source");span.appendChild(document.createTextNode("["));const a=(0,_util.appendNewElements)(span,"A");a.setAttribute("href",element);a.setAttribute("target","_blank");switch(name){case"web":case"cache":case"plain":this.localMessage(name,name).then(n=>{a.textContent=n});break;default:a.textContent=name;break;}span.appendChild(document.createTextNode("]"))}}}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("failed-to-load-examples","Failed to load examples.").then(msg=>{p.textContent=msg})})};// load examples right now.
 loadMoreExamples()}/**
+	 * Creates a function which given some plain text will return HTML code where the given phrase is emphasized.
+	 *
+	 * @param {string} phrase
+	 * @param {number} context The number of characters allowed around the phrase.
+	 * @returns {(text: string) => string}
+	 */_createEmphasizer(phrase,context){const emphasisRE=new RegExp(phrase.replace(/[\\/(){}[\]|?+*^$.]/g,"\\$&")+"|(<)|(&)","ig");return text=>{/** @type {number | undefined} */let index;text.replace(emphasisRE,(m,lt,amp,i)=>{if(lt||amp)return"";index=i;return""});if(index!=void 0){if(text.length>index+context){text=text.substr(0,index+context).replace(/\s+\S*$/," ...")}if(index>context){text=text.substr(index-context).replace(/^\S*\s+/,"... ")}}return text.replace(emphasisRE,(m,lt,amp,index)=>{if(lt)return"&lt;";if(amp)return"&amp;";index=index;return`<strong>${(0,_util.encode)(m)}</strong>`})}}/**
 	 * @param {HTMLElement} element
 	 * @param {Phrase} phrase
 	 */_setResultElementPinned(element,phrase){if(this.pinnedPhrases.has(phrase.id)){element.setAttribute("pinned","")}else{element.removeAttribute("pinned")}}/**
