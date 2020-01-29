@@ -86,7 +86,7 @@ const id=text.replace(/\d+/g,"0");if(pastExamples.has(id))return!1;pastExamples.
 	 * @param {number} count
 	 * @returns {SnippetSupplier}
 	 */getSupplier(phrase,count){phrase=(0,_util.normalizeSpaces)(phrase);let internalPage=0,noFurtherExamples=!1;// whether the snippet API doesn't have any more examples
-return()=>{if(noFurtherExamples){return Promise.resolve(!1)}/**@type {NetspeakSnippetsRequest} */const request={query:phrase,size:count,from:count*internalPage++};return this.search(request).then(res=>{if(0===res.results.length){noFurtherExamples=!0;return!1}/** @type {Snippet[]} */const snippets=[];res.results.forEach(({snippet,target_uri,uuid})=>{const urls={web:target_uri,cache:`https://www.chatnoir.eu/cache?uuid=${uuid}`,plain:`https://www.chatnoir.eu/cache?uuid=${uuid}&plain`};snippets.push({text:(0,_util.normalizeSpaces)((0,_util.textContent)(snippet)),urls})});return snippets})}}/**
+return()=>{if(noFurtherExamples){return Promise.resolve(!1)}/**@type {NetspeakSnippetsRequest} */const request={query:phrase,size:count,from:count*internalPage++};return this.search(request).then(res=>{if(0===res.results.length){noFurtherExamples=!0;return!1}/** @type {Snippet[]} */const snippets=[];res.results.forEach(({snippet,target_uri,uuid,index})=>{const chatNoirUrl=`https://www.chatnoir.eu/cache?uuid=${uuid}&index=${encodeURIComponent(index)}`,urls={web:target_uri,cache:chatNoirUrl,plain:`${chatNoirUrl}&plain`};snippets.push({text:(0,_util.normalizeSpaces)((0,_util.textContent)(snippet)),urls})});return snippets})}}/**
 	 * The simple search operation of the Snippets API.
 	 *
 	 * @param {NetspeakSnippetsRequest} request The request details passed to the API.
