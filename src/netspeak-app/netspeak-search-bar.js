@@ -1,4 +1,4 @@
-define(["exports","meta","./netspeak-element.js","./netspeak.js","./snippets.js","./util.js","./netspeak-navigator.js","./netspeak-example-queries.js"],function(_exports,meta,_netspeakElement,_netspeak,_snippets,_util,_netspeakNavigator,_netspeakExampleQueries){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.PhraseFormatter=_exports.NetspeakSearchBar=void 0;meta=babelHelpers.interopRequireWildcard(meta);/**
+define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./netspeak-navigator.js","./netspeak-example-queries.js","./snippets.js"],function(_exports,meta,_netspeakElement,_netspeak,_util,_netspeakNavigator,_netspeakExampleQueries,_snippets){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.PhraseFormatter=_exports.NetspeakSearchBar=void 0;meta=babelHelpers.interopRequireWildcard(meta);/**
  * @typedef QueryPhrasesOptions
  * @property {"append" | "overwrite"} [options.appendMode="overwrite"] How the queried phrases will be integrated into the existing ones. "append": All of the new phrases will be added. "overwrite": All already queried phrases will be removed and the newly queried will be added.
  * @property {number} [options.topk=this.initialLimit] The maximum number of phrases queried.
@@ -485,20 +485,17 @@ container.querySelector("#drop-down").blur()}}}/**
 				text-align: center;
 			}
 
-			#result-list .options .examples-list em {
-				font-weight: bold;
+			#result-list .options .examples-list .source {
+				padding-left: .25em;
 			}
 
-			#result-list .options .examples-list a {
+			#result-list .options .examples-list .source a {
 				color: inherit;
 				opacity: .7;
-				padding: 0 .5em;
+				text-decoration: none;
 			}
-
-			#result-list .options .examples-list a::after {
-				content: "\\21F1";
-				display: inline-block;
-				transform: rotate(90deg);
+			#result-list .options .examples-list .source a:hover {
+				text-decoration: underline;
 			}
 
 			#result-list .options .load-more {
@@ -557,7 +554,7 @@ container.querySelector("#drop-down").blur()}}}/**
 		<button id="load-more-button" style="display: none;">
 			<span class="load-more-img"></span>
 		</button>
-		`}get isEmpty(){return 0===this.pinnedPhrases.size+this.phrases.length}constructor(){super();this.showLoadMore=!1;this.examplePageSize=6;/** @type {Phrase[]} */this.phrases=[];/** @type {Map<string, Phrase>} */this.pinnedPhrases=new Map;this.snippetsApi=_snippets.Snippets.getInstance();this.formatter=PhraseFormatter.getInstance();this.invalidate=(0,_util.createNextFrameInvoker)(()=>this._render());this.addEventListener("phrases-changed",()=>this.invalidate());this.addEventListener("formatter-changed",()=>this.invalidate())}connectedCallback(){super.connectedCallback();/** @type {HTMLElement} */this._resultList=this.shadowRoot.querySelector("#result-list");/** @type {HTMLElement} */this._loadMore=this.shadowRoot.querySelector("#load-more-button");this.addEventListener("show-load-more-changed",()=>{if(this._loadMore){this._loadMore.style.display=this.showLoadMore?"block":"none"}});this._loadMore.addEventListener("click",()=>{this.dispatchEvent(new CustomEvent("load-more",{bubbles:!1,cancelable:!1}))})}clear(){this.phrases=[];this.pinnedPhrases.clear();this.showLoadMore=!1;this.invalidate()}_render(){if(!this.isConnected)return;const collection=new NewPhraseCollection(this._getAllPhrasesToRender()),existingElementPhraseIdsSet=new Set;// update or delete current DOM elements
+		`}get isEmpty(){return 0===this.pinnedPhrases.size+this.phrases.length}constructor(){super();this.showLoadMore=!1;this.examplePageSize=6;/** @type {Phrase[]} */this.phrases=[];/** @type {Map<string, Phrase>} */this.pinnedPhrases=new Map;this.snippets=_snippets.DEFAULT_SNIPPETS;this.formatter=PhraseFormatter.getInstance();this.invalidate=(0,_util.createNextFrameInvoker)(()=>this._render());this.addEventListener("phrases-changed",()=>this.invalidate());this.addEventListener("formatter-changed",()=>this.invalidate())}connectedCallback(){super.connectedCallback();/** @type {HTMLElement} */this._resultList=this.shadowRoot.querySelector("#result-list");/** @type {HTMLElement} */this._loadMore=this.shadowRoot.querySelector("#load-more-button");this.addEventListener("show-load-more-changed",()=>{if(this._loadMore){this._loadMore.style.display=this.showLoadMore?"block":"none"}});this._loadMore.addEventListener("click",()=>{this.dispatchEvent(new CustomEvent("load-more",{bubbles:!1,cancelable:!1}))})}clear(){this.phrases=[];this.pinnedPhrases.clear();this.showLoadMore=!1;this.invalidate()}_render(){if(!this.isConnected)return;const collection=new NewPhraseCollection(this._getAllPhrasesToRender()),existingElementPhraseIdsSet=new Set;// update or delete current DOM elements
 for(let i=this._resultList.children.length-1;0<=i;i--){const element=/** @type {HTMLElement} */this._resultList.children[i],elementPhrase=this._getResultElementPhrase(element);if(!elementPhrase){// delete
 element.remove();continue}const mapEntry=collection.byId(elementPhrase.id);if(mapEntry){// update
 existingElementPhraseIdsSet.add(elementPhrase.id);this._setResultElementPinned(element,elementPhrase);this._setResultElementStats(element,elementPhrase,collection)}else{// delete
@@ -580,27 +577,16 @@ this._addResultElementOptionsExamples(options,phrase)}/**
 	 * @param {Phrase} phrase
 	 */_addResultElementOptionsExamples(options,phrase){const examplesContainer=(0,_util.appendNewElements)(options,"DIV.examples-container"),examplesList=(0,_util.appendNewElements)(examplesContainer,"div.examples-list"),loadMoreExamplesContainer=(0,_util.appendNewElements)(examplesContainer,"div.load-more-examples"),loadingIcon=(0,_util.appendNewElements)(loadMoreExamplesContainer,"SPAN.btn-img.loading");(0,_util.appendNewElements)(loadingIcon,"SPAN.btn-img");// load more button
 const button=(0,_util.appendNewElements)(loadMoreExamplesContainer,"BUTTON.load-more");(0,_util.appendNewElements)(button,"SPAN.load-more-img");button.addEventListener("click",()=>loadMoreExamples());// load examples function
-const exampleSupplier=this._createExampleSupplier(phrase,this.examplePageSize),loadMoreExamples=()=>{loadingIcon.style.display=null;button.style.display="none";const examplePromise=exampleSupplier();examplePromise.then(examples=>{if(!1===examples){loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("no-examples-found","No examples found.").then(msg=>{p.textContent=msg})}else{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=example.snippet;(0,_util.appendNewElements)(p,"A").setAttribute("href",example.source)}}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("failed-to-load-examples","Failed to load examples.").then(msg=>{p.textContent=msg})})};// load examples right now.
+const exampleSupplier=this.snippets.getSupplier(phrase.text,this.examplePageSize),emphasize=this._createEmphasizer(phrase.text,200);let didSupplyExamples=!1;const loadMoreExamples=()=>{loadingIcon.style.display=null;button.style.display="none";const examplePromise=exampleSupplier();examplePromise.then(examples=>{if(!1===examples){loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P"),i=(0,_util.appendNewElements)(p,"I");if(didSupplyExamples){this.localMessage("no-further-examples-found","No further examples found.").then(msg=>{i.textContent=msg})}else{this.localMessage("no-examples-found","No examples found.").then(msg=>{i.textContent=msg})}}else{loadingIcon.style.display="none";button.style.display=null;for(const example of examples){didSupplyExamples=!0;// add paragraph
+const p=(0,_util.appendNewElements)(examplesList,"DIV","P");p.innerHTML=emphasize(example.text);// add source(s) of the example
+for(const name in example.urls){const element=example.urls[name],span=(0,_util.appendNewElements)(p,"SPAN.source");span.appendChild(document.createTextNode("["));const a=(0,_util.appendNewElements)(span,"A");a.setAttribute("href",element);a.setAttribute("target","_blank");a.textContent=name;span.appendChild(document.createTextNode("]"))}}}}).catch(e=>{console.error(e);loadingIcon.style.display="none";button.style.display="none";const p=(0,_util.appendNewElements)(examplesList,"DIV","P");this.localMessage("failed-to-load-examples","Failed to load examples.").then(msg=>{p.textContent=msg})})};// load examples right now.
 loadMoreExamples()}/**
-	 * Returns a function which will return a new examples every time it is invoked.
+	 * Creates a function which given some plain text will return HTML code where the given phrase is emphasized.
 	 *
-	 * @param {Phrase} phrase
-	 * @param {number} requestCount
-	 * @returns {() => Promise<Snippet[] | false>}
-	 *
-	 * @typedef {{ snippet: string; source: string }} Snippet
-	 */_createExampleSupplier(phrase,requestCount){const pastExamples=new Set([""]),snippetsBuffer=[];/** @type {Snippet[]} */let internalPage=0,internalPageSize=100;const snippetsApi=this.snippetsApi;let startTime=-1;const timeout=5e3;// ms
-// whether the snippet API doesn't have any more examples
-let noFurtherExamples=!1;/**
-		 * @returns {Promise<Snippet[] | false>}
-		 */function loadSnippets(){if(snippetsBuffer.length>=requestCount){return Promise.resolve(snippetsBuffer.splice(0,requestCount))}if(0<snippetsBuffer.length&&new Date().valueOf()-startTime>timeout){// return all of them early if we take too long
-return Promise.resolve(snippetsBuffer.splice(0,snippetsBuffer.length))}if(noFurtherExamples){if(snippetsBuffer.length){return Promise.resolve(snippetsBuffer.splice(0,snippetsBuffer.length))}else{return Promise.resolve(!1)}}// load and buffer snippets
-return snippetsApi.search({query:phrase.text,size:internalPageSize,from:internalPageSize*internalPage++}).then(res=>{if(0===res.results.length){noFurtherExamples=!0}for(const _ref of res.results){const{snippet,target_uri}=_ref,text=(0,_util.textContent)(snippet).toLowerCase();if(-1===text.indexOf(phrase.text.toLowerCase()))continue;// The basic idea behind this id is that most duplicate examples are equal character for character,
-// so a simple (and fast) hash lookup is sufficient.
-// To also filter duplicates which are technically different but don't look very different to
-// humans, some additional transformation are performed.
-const id=text.replace(/\d+/g,"0");// To be added to the buffer, the queried snippet has to not be a duplicate of a previous example.
-if(!pastExamples.has(id)){pastExamples.add(id);snippetsBuffer.push({snippet:snippet+"...",source:target_uri})}}return loadSnippets()})}return()=>{startTime=new Date().valueOf();return loadSnippets()}}/**
+	 * @param {string} phrase
+	 * @param {number} context The number of characters allowed around the phrase.
+	 * @returns {(text: string) => string}
+	 */_createEmphasizer(phrase,context){const emphasisRE=new RegExp(phrase.replace(/[\\/(){}[\]|?+*^$.]/g,"\\$&")+"|(<)|(&)","ig");return text=>{/** @type {number | undefined} */let index;text.replace(emphasisRE,(m,lt,amp,i)=>{if(lt||amp)return"";index=i;return""});if(index!=void 0){if(text.length>index+context){text=text.substr(0,index+context).replace(/\s+\S*$/," ...")}if(index>context){text=text.substr(index-context).replace(/^\S*\s+/,"... ")}}return text.replace(emphasisRE,(m,lt,amp,index)=>{if(lt)return"&lt;";if(amp)return"&amp;";index=index;return`<strong>${(0,_util.encode)(m)}</strong>`})}}/**
 	 * @param {HTMLElement} element
 	 * @param {Phrase} phrase
 	 */_setResultElementPinned(element,phrase){if(this.pinnedPhrases.has(phrase.id)){element.setAttribute("pinned","")}else{element.removeAttribute("pinned")}}/**
