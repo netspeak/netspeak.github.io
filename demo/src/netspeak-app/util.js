@@ -12,7 +12,7 @@ define(["exports"],function(_exports){"use strict";Object.defineProperty(_export
  * @returns {HTMLElement} The created HTML element.
  */function newElement(selector="SPAN"){// tag name
 let tagName=selector.replace(/[^\w-][\s\S]*/,"");if(!tagName||"*"==tagName)tagName="SPAN";// attributes
-const attrs=[],r=/\[([\w-]+)(?:=("[^"]*"|[^"][^\]]*|))?\]/g;for(let phrase;phrase=r.exec(selector);)attrs.push([phrase[1],phrase[2]||""]);selector=selector.replace(r,"");// id, classes
+/** @type {[string, string][]} */const attrs=[],r=/\[([\w-]+)(?:=("[^"]*"|'[^']*'|[^"'\]][^\]]*|))?\]/g;for(let phrase;phrase=r.exec(selector);){const name=phrase[1];let value=phrase[2]||"";if("'"===value[0]||"\""===value[0])value=value.substr(1,value.length-2);attrs.push([name,value])}selector=selector.replace(r,"");// id, classes
 const id=selector.match(/#([\w-]+)/),classes=selector.match(/\.[\w-]+/g),e=document.createElement(tagName);for(const phrase of attrs){e.setAttribute(phrase[0],phrase[1])}if(id)e.id=id[1];if(classes)classes.forEach(c=>e.classList.add(c.substring(1)));return e}/**
  * Creates new HTML elements and appends them to either the given parent or the previously create element.
  * This means that appendNewElements(par, s1) = par.appendChild(newElement(s1)) and that appendNewElements(par, s1, s2) = appendNewElements(appendNewElements(par, s1), s2)
