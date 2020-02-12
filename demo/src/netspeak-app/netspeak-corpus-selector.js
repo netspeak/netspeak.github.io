@@ -20,7 +20,7 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js"],fu
 			}
 
 			#wrapper .button.selected {
-				background-color: #F8F8F8;
+				background-color: #EEE;
 				border-color: #888;
 			}
 
