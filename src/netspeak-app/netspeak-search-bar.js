@@ -93,6 +93,7 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./
 			}
 
 			#box input {
+				background-color: transparent;
 				border: none;
 				display: block;
 				box-sizing: border-box;
@@ -329,7 +330,6 @@ container.querySelector("#drop-down").blur()}}}/**
 
 			#result-list>div {
 				background-color: var(--item-background-color);
-				display: table;
 				width: 100%;
 				padding: 0;
 			}
