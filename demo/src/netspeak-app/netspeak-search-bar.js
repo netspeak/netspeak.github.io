@@ -62,17 +62,20 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./
 	</style>
 `;/**
  * The Netspeak search bar can query and display phrases queried using the Netspeak API.
- */class NetspeakSearchBar extends _netspeakElement.NetspeakElement{static get is(){return"netspeak-search-bar"}static get properties(){return{query:{type:String,value:"",observer:"_queryChanged"},corpus:{type:String,value:_netspeak.Netspeak.defaultCorpus,notify:!0},initialLimit:{type:Number,value:40},readonly:{type:Boolean,value:!1},slowSearch:{type:Boolean,value:!1},initialExamplesLimit:{type:Number,value:6},historyHidden:{type:Boolean,value:!1,notify:!0,observer:"_historyHiddenChanged"},infoVisibleByDefault:{type:Boolean,value:!1,notify:!0}}}static get template(){return _netspeakElement.html`
+ */class NetspeakSearchBar extends _netspeakElement.NetspeakElement{static get importMeta(){return meta}static get is(){return"netspeak-search-bar"}static get properties(){return{query:{type:String,value:"",observer:"_queryChanged"},corpus:{type:String,value:_netspeak.Netspeak.defaultCorpus,notify:!0},initialLimit:{type:Number,value:40},readonly:{type:Boolean,value:!1},slowSearch:{type:Boolean,value:!1},initialExamplesLimit:{type:Number,value:6},historyHidden:{type:Boolean,value:!1,notify:!0,observer:"_historyHiddenChanged"},infoVisibleByDefault:{type:Boolean,value:!1,notify:!0}}}static get template(){return _netspeakElement.html`
 		${sharedStyles}
 
 		<style>
 			:host {
-				display: block;
-				font-size: 1em;
-
 				--border-color: #BBB;
 				--left-right-padding: 0;
 				--left-right-border-style: solid;
+
+				display: block;
+				font-size: 1em;
+				border-color: var(--border-color);
+				border-style: solid var(--left-right-border-style) none var(--left-right-border-style);
+				border-width: 1px;
 			}
 
 			/*
@@ -82,8 +85,7 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./
 			#box {
 				display: block;
 				padding: 0 var(--left-right-padding);
-				border: 1px var(--border-color);
-				border-style: solid var(--left-right-border-style);
+				border-bottom: 1px solid var(--border-color);
 				font-family: var(--input-font-family, inherit);
 			}
 
@@ -162,8 +164,7 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./
 			 */
 
 			#result-wrapper {
-				border: 1px var(--border-color);
-				border-style: none var(--left-right-border-style) solid var(--left-right-border-style);
+				border-bottom: 1px solid var(--border-color);
 				font-family: var(--result-font-family, inherit);
 			}
 
@@ -173,22 +174,69 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./
 
 			div#errors {
 				display: block;
-				border: 1px var(--border-color);
-				border-style: none var(--left-right-border-style) solid var(--left-right-border-style);
+				border-bottom: 1px solid var(--border-color);
 			}
 
 			div#errors>p {
 				background-color: #EAA;
 				color: #300;
 				display: block;
-				padding: 1em 2em;
+				padding: 1em;
 				margin: 0;
 				word-break: break-word;
 			}
 
 			/*
-			 * RESULT
+			 * WARNINGS
 			 */
+
+			div#warnings {
+				display: table;
+				box-sizing: border-box;
+				width: 100%;
+
+				background-color: #EDA;
+				border-bottom: 1px solid var(--border-color);
+			}
+
+			div#warnings>p {
+				color: #420;
+				display: block;
+				margin: 1em;
+				word-break: break-word;
+			}
+
+			div#warnings span.suggestion:hover {
+				cursor: pointer;
+				text-decoration: underline;
+			}
+
+			/*
+			 * EXAMPLE QUERIES
+			 */
+
+			netspeak-example-queries {
+				border-bottom: 1px solid var(--border-color);
+			}
+
+			/*
+			 * NO PHRASES FOUND
+			 */
+
+			#no-phrases-found-container {
+				border-bottom: 1px solid var(--border-color);
+
+				display: block;
+				font-family: var(--result-font-family, inherit);
+				color: #444;
+				padding: 0 var(--left-right-padding);
+			}
+
+			#no-phrases-found-container p {
+				font-style: italic;
+				padding: .3em .5em;
+				margin: 0;
+			}
 
 			/*
 			 * PRELOAD IMAGES
@@ -226,13 +274,16 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./
 		</div>
 
 		<div id="errors" style="display: none"></div>
+		<div id="warnings" style="display: none"></div>
 
 		<netspeak-example-queries corpus$="{{corpus}}"></netspeak-example-queries>
 
 		<div id="result-wrapper" style="display: none">
-
 			<netspeak-search-bar-result-list></netspeak-search-bar-result-list>
+		</div>
 
+		<div id="no-phrases-found-container" style="display: none">
+			<p id="no-phrases-found">No phrases found.</p>
 		</div>
 
 		<div id="img-pre-loader"></div>
@@ -250,10 +301,14 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./
 	 */get history(){if(!this._history)this._history=[];const limit=1024;if(this._history.length>limit)this._history.splice(0,this._history.length-limit);return this._history}/**
 	 * Creates a new instance of NetspeakSearchBar.
 	 *
-	 */constructor(){super();this.netspeakApi=_netspeak.Netspeak.getInstance();this._queriedPhrases=new _netspeak.PhraseCollection;// for typing purposes
+	 */constructor(){super();this.netspeakApi=_netspeak.Netspeak.getInstance();this._queriedPhrases=new _netspeak.PhraseCollection;this._queryCount=0;// for typing purposes
 /** @type {string} */this.query=this.query;/** @type {string} */this.corpus=this.corpus;/** @type {number} */this.initialLimit=this.initialLimit;/** @type {boolean} */this.readonly=this.readonly;/** @type {boolean} */this.slowSearch=this.slowSearch;/** @type {number} */this.initialExamplesLimit=this.initialExamplesLimit;/** @type {boolean} */this.historyHidden=this.historyHidden;/** @type {boolean} */this.infoVisibleByDefault=this.infoVisibleByDefault}/**
 	 * The method called after the element was added to the DOM.
-	 */connectedCallback(){super.connectedCallback();/** @type {HTMLInputElement} */this._queryInputElement=this.shadowRoot.querySelector("#query-input");/** @type {HTMLButtonElement} */this._exampleQueriesButton=this.shadowRoot.querySelector("#example-queries-button");/** @type {HTMLButtonElement} */this._clearButton=this.shadowRoot.querySelector("#clear-button");/** @type {HTMLButtonElement} */this._historyButton=this.shadowRoot.querySelector("#history-button");/** @type {import("./netspeak-example-queries").NetspeakExampleQueries} */this._exampleQueries=this.shadowRoot.querySelector("netspeak-example-queries");/** @type {NetspeakSearchBarResultList} */this._resultList=this.shadowRoot.querySelector("netspeak-search-bar-result-list");this._historyHiddenChanged(this.historyHidden);this._resultList.addEventListener("load-more",()=>this._loadMoreItems());this._exampleQueries.addEventListener("query-selected",e=>{// @ts-ignore
+	 */connectedCallback(){super.connectedCallback();/** @type {HTMLInputElement} */this._queryInputElement=this.shadowRoot.querySelector("#query-input");/** @type {HTMLButtonElement} */this._exampleQueriesButton=this.shadowRoot.querySelector("#example-queries-button");/** @type {HTMLButtonElement} */this._clearButton=this.shadowRoot.querySelector("#clear-button");/** @type {HTMLButtonElement} */this._historyButton=this.shadowRoot.querySelector("#history-button");/** @type {import("./netspeak-example-queries").NetspeakExampleQueries} */this._exampleQueries=this.shadowRoot.querySelector("netspeak-example-queries");/** @type {NetspeakSearchBarResultList} */this._resultList=this.shadowRoot.querySelector("netspeak-search-bar-result-list");/** @type {NetspeakSearchBarResultList} */this._noPhraseFoundContainer=this.shadowRoot.querySelector("#no-phrases-found-container");this._queryInputElement.onblur=()=>{// this is a hack to ignore inputs from blur event.
+// blur events are dispatched after the input event, so in the exactly wrong order.
+// to combat this, we will set a flag of 3ms after which it is reset.
+// input event will be delayed by 1ms to hopefully see the blur flag.
+this._inputBlurred=!0;setTimeout(()=>{this._inputBlurred=!1},3)};this._historyHiddenChanged(this.historyHidden);this._resultList.addEventListener("load-more",()=>this._loadMoreItems());this._exampleQueries.addEventListener("query-selected",e=>{// @ts-ignore
 this.query=e.detail.query});this._setExampleQueriesVisibility(this.infoVisibleByDefault)}/**
 	 * Fires a new event with the given name and values.
 	 *
@@ -265,21 +320,23 @@ this.query=e.detail.query});this._setExampleQueriesVisibility(this.infoVisibleBy
 	 * @param {boolean} [cancelable=false] Whether the event can be cancelled.
 	 * @returns {boolean} Whether the event was cancelled.
 	 */dispatchChangeEvent(name,newValue,oldValue,cancelable=!1){return this.dispatchEvent(new CustomEvent(name,{detail:{newValue:newValue,oldValue:oldValue},bubbles:!1,cancelable:cancelable}))}_queryChanged(newValue,oldValue){if(this._queryChanging)throw Error("You cannot modify the query during a query change event");this._queryChanging=!0;try{const focusInput=!!this._focusInput;this._focusInput=!1;// hide examples if they weren't used
-if(this._exampleQueries&&0===this._exampleQueries.clickCounter){this._setExampleQueriesVisibility(!1)}this.dispatchChangeEvent("queryChange",newValue,oldValue);this.queryPhrases({focusInput:focusInput})}finally{this._queryChanging=!1}}_queryInputChange(e){if(this.readonly)return;const query=e.target.value;this._focusInput=!0;if(query!=this.query)this.query=query;else this.queryPhrases()}_queryInputKeyUp(e){if(this.slowSearch||this.readonly)return;const newQuery=e.target.value;if((0,_netspeak.normalizeQuery)(newQuery)===(0,_netspeak.normalizeQuery)(this.query))return;this._focusInput=!0;this.query=newQuery;this._addToHistory({query:newQuery,corpus:this.corpus},!0)}/**
+if(this._exampleQueries&&0===this._exampleQueries.clickCounter){this._setExampleQueriesVisibility(!1)}this.dispatchChangeEvent("queryChange",newValue,oldValue);this.queryPhrases({focusInput:focusInput})}finally{this._queryChanging=!1}}_queryInputChange(e){if(this.readonly)return;const query=e.target.value,counter=this._queryCount;setTimeout(()=>{if(this._queryCount!==counter){// too slow
+return}if(this._inputBlurred){// blurred
+return}this._focusInput=!0;if(query!=this.query){this.query=query}else{this.queryPhrases()}},1)}_queryInputKeyUp(e){if(this.slowSearch||this.readonly)return;const newQuery=e.target.value;if((0,_netspeak.normalizeQuery)(newQuery)===(0,_netspeak.normalizeQuery)(this.query))return;this._focusInput=!0;this.query=newQuery;this._addToHistory({query:newQuery,corpus:this.corpus},!0)}/**
 	 * Queries phrases using the Netspeak API adding them to or overwriting the phrases queried before.
 	 *
 	 * @param {QueryPhrasesOptions} [options={}]
-	 */queryPhrases(options={}){const searchOptions=options.searchOptions||{},request={query:this.query,corpus:this.corpus,focusInput:!!options.focusInput};// request
+	 */queryPhrases(options={}){this._queryCount++;const searchOptions=options.searchOptions||{},request={query:this.query,corpus:this.corpus,focusInput:!!options.focusInput};// request
 // add to history
 if(request.query&&request.corpus)this._addToHistory({query:request.query,corpus:request.corpus},!0);const addToRequest=(prop,defaultValue=void 0)=>{if(options[prop]!=void 0)request[prop]=options[prop];else if(defaultValue!==void 0)request[prop]=defaultValue};addToRequest("topk",this.initialLimit);addToRequest("maxfreq");// a more expensive search for the first query
 if(!this._hadFirstQuery){this._hadFirstQuery=!0;if(!("topkMode"in searchOptions)){searchOptions.topkMode="fill"}}const append="append"==options.appendMode;let searchResult;if(!(0,_netspeak.normalizeQuery)(request.query)){// note that this optimization will also catch the first empty query from the polymer query change event.
-searchResult=Promise.resolve(/** @type {import("./netspeak").NetspeakSearchResult} */[])}else{searchResult=this.netspeakApi.search(request,searchOptions)}searchResult.then(phrases=>{this._onSearchSuccess(phrases,request,append)}).catch(reason=>{this._onSearchError(reason,request,append)})}/**
+searchResult=Promise.resolve(/** @type {import("./netspeak").NetspeakSearchResult} */{phrases:[],unknownWords:[]})}else{searchResult=this.netspeakApi.search(request,searchOptions)}searchResult.then(result=>{this._onSearchSuccess(result,request,append)}).catch(reason=>{this._onSearchError(reason,request,append)})}/**
 	 *
-	 * @param {import("./netspeak").NetspeakSearchResult} phrases
+	 * @param {import("./netspeak").NetspeakSearchResult} result
 	 * @param {{ query: string, corpus: string, focusInput: boolean }} request
 	 * @param {boolean} append
-	 */_onSearchSuccess(phrases,request,append=!1){if(this.query!==request.query)return;// too late
-let newPhrases=phrases.length;this.errorMessage="";if(append){newPhrases=this._queriedPhrases.addAll(phrases)}else{this._queriedPhrases=_netspeak.PhraseCollection.from(phrases)}this._resultList.showLoadMore=!phrases.complete&&0<newPhrases;this.update(request.focusInput)}/**
+	 */_onSearchSuccess(result,request,append=!1){if(this.query!==request.query)return;// too late
+let newPhrases=result.phrases.length;/** @type {string[]} */this.unknownWords=result.unknownWords;this.errorMessage="";if(append){newPhrases=this._queriedPhrases.addAll(result.phrases)}else{this._queriedPhrases=_netspeak.PhraseCollection.from(result.phrases)}this._resultList.showLoadMore=!result.complete&&0<newPhrases;this.update(request.focusInput)}/**
 	 *
 	 * @param {string | Error} message
 	 * @param {{ query: string, corpus: string, focusInput: boolean }} request
@@ -288,12 +345,32 @@ let newPhrases=phrases.length;this.errorMessage="";if(append){newPhrases=this._q
 	 */_onSearchError(message,request,append=!1,delay=1e3){if(this.query!==request.query)return;// too late
 // delay
 if(0<delay){setTimeout(()=>this._onSearchError(message,request,append,0),delay);return}// disable load more
-this._resultList.showLoadMore=!1;console.error(message,request);this.errorMessage=message;this.update(request.focusInput)}update(focusInput=!1){// declare variables
+this._resultList.showLoadMore=!1;console.error(message,request);this.errorMessage=message;this.unknownWords=[];this.update(request.focusInput)}update(focusInput=!1){// declare variables
 const queriedPhrases=this.queriedPhrases;this._resultList.phrases=queriedPhrases.toArray();// wrapper
-/** @type {HTMLDivElement} */const wrapper=this.shadowRoot.querySelector("#result-wrapper"),errors=this.shadowRoot.querySelector("#errors");// output errors
-/** @type {HTMLElement} */if(this.errorMessage){errors.style.display=null;errors.innerHTML="";(0,_util.appendNewElements)(errors,"P").textContent=this.errorMessage+"";// the wrapper should stay as is
+/** @type {HTMLDivElement} */const wrapper=this.shadowRoot.querySelector("#result-wrapper"),warnings=this.shadowRoot.querySelector("#warnings");// output unknown words
+/** @type {HTMLElement} */this.unknownWords=(this.unknownWords||[]).filter(Boolean);if(0<this.unknownWords.length){warnings.style.display=null;this._updateWarnings(warnings,this.unknownWords)}else{warnings.style.display="none"}// output errors
+/** @type {HTMLElement} */const errors=this.shadowRoot.querySelector("#errors");if(this.errorMessage){errors.style.display=null;this._updateErrorMessage(errors,this.errorMessage);// the wrapper should stay as is
 }else{errors.style.display="none";// wrapper
-wrapper.style.display=!this._resultList.isEmpty?"block":"none"}if(focusInput&&this._queryInputElement){this._queryInputElement.focus()}}_loadMoreItems(){/** @type {QueryPhrasesOptions} */const options={appendMode:"append",topk:this.initialLimit,searchOptions:{topkMode:"fill"}};// max frequency
+wrapper.style.display=!this._resultList.isEmpty?"block":"none"}// show "no phrase found" message
+if(0===this._resultList.phrases.length&&!this._resultList.showLoadMore&&this.query){this._noPhraseFoundContainer.style.display=null}else{this._noPhraseFoundContainer.style.display="none"}if(focusInput&&this._queryInputElement){this._queryInputElement.focus()}}/**
+	 * @param {HTMLElement} container
+	 * @param {readonly string[]} unknownWords Must be non-empty
+	 */_updateWarnings(container,unknownWords){container.innerHTML="";this.localMessage("unknown-word","Unknown word ${word}.").then(unknownWordMessage=>{unknownWordMessage=(0,_util.encode)(unknownWordMessage);unknownWords.forEach(word=>{const p=(0,_util.appendNewElements)(container,"P");p.innerHTML=unknownWordMessage.replace(/\$\{word\}/g,()=>{return`<em>${word}</em>`});// TODO: Add REAL support for suggestion for all-lower-case indexes.
+const lower=word.toLowerCase();if("web-en"===this.corpus&&word!==lower){const WORD_BOUNDARY=/^[|[\]{}\s]$/;let suggestion=this.query,startIndex=0;// replace all occurrences
+while(startIndex<suggestion.length){const index=suggestion.indexOf(word,startIndex);if(-1===index)break;// check boundaries
+const before=suggestion[index-1],after=suggestion[index+word.length];if(before&&!WORD_BOUNDARY.test(before)||after&&!WORD_BOUNDARY.test(after)){startIndex=index+word.length;continue}suggestion=suggestion.slice(0,index)+lower+suggestion.slice(index+word.length);startIndex=index+lower.length}this.localMessage("did-you-mean","Did you mean ${word}?").then(didYouMeanMessage=>{p.appendChild(document.createTextNode(" "));didYouMeanMessage.split(/\$\{word\}/g).forEach((segment,i)=>{if(0<i){const span=(0,_util.appendNewElements)(p,"em","span");span.className="suggestion";span.textContent=lower;span.addEventListener("click",()=>{this.query=suggestion})}p.appendChild(document.createTextNode(segment))})})}})})}/**
+	 * @param {HTMLElement} container
+	 * @param {string | Error} details
+	 */_updateErrorMessage(container,details){container.innerHTML="";Promise.all([this.localMessage("invalid-query",`Your input cannot be processed because it does not follow the Netspeak query syntax.
+					Please correct your input.
+					<br><br>
+					More information about the Netpspeak query syntax can be found
+					<a href="https://netspeak.org/help.html#how" target="_blank">here</a>.`),this.localMessage("full-details","Full details")]).then(([invalidQuery,fullDetails])=>{(0,_util.appendNewElements)(container,"P").innerHTML=`${invalidQuery}
+				<br>
+				<br>
+				<details><summary>${(0,_util.encode)(fullDetails)}</summary>
+					<p>${(0,_util.encode)(details+"")}</p>
+				</details>`})}_loadMoreItems(){/** @type {QueryPhrasesOptions} */const options={appendMode:"append",topk:this.initialLimit,searchOptions:{topkMode:"fill"}};// max frequency
 if(this.queriedPhrases&&0<this.queriedPhrases.length){options.maxfreq=this.queriedPhrases.at(this.queriedPhrases.length-1).frequency}this.queryPhrases(options)}/**
 	 * Clears the current query and removes all queried and pinned phrases.
 	 *
@@ -376,6 +453,9 @@ container.querySelector("#drop-down").blur()}}}/**
 
 			#result-list span.text {
 				float: left;
+			}
+			#result-list [pinned] span.text {
+				font-weight: bold;
 			}
 
 			#result-list span.freq {

@@ -14,7 +14,7 @@ return(0,_polymerElement.html)([htmlSource])}/**
  * @property {Object<string, string>} [messages]
  * @property {any} [custom]
  *
- * @typedef {Function & PolymerConstructorProperties} PolymerConstructor
+ * @typedef {CustomElementConstructor & PolymerConstructorProperties} PolymerConstructor
  *
  * @typedef PolymerConstructorProperties
  * @property {string} is The HTML tag name of the custom HTML element.
@@ -27,9 +27,9 @@ return(0,_polymerElement.html)([htmlSource])}/**
  *
  * The returned promise will resolve to `false` if the current language is the default language (en).
  *
- * @param {PolymerConstructor} constructor
+ * @param {Function} constructor
  * @returns {Promise<LocalizationJson | false>}
- */function loadLocalization(constructor){let promise=localizationCache.get(constructor);if(!promise){/** @type {string} */const is=constructor.is,meta=constructor.importMeta,noDefaultLocalization=!!constructor.noDefaultLocalization;/** @type {{ url: string }} */if(meta&&meta.url&&is){const currentLang=_netspeakNavigator.NetspeakNavigator.currentLanguage;if(!noDefaultLocalization&&currentLang==_netspeakNavigator.NetspeakNavigator.defaultLanguage){promise=Promise.resolve(!1)}else{const url=new URL(meta.url);url.hash=url.search="";const dir=url.pathname.replace(/\/[^/]*$/,"");url.pathname=`${dir}/locales/${is}.${currentLang}.json`;promise=fetch(url.href).then(resp=>resp.json())}}else if(!is){promise=Promise.reject(`No 'is' property on ${constructor.name}`)}else{promise=Promise.reject(`No 'importMeta' property on ${constructor.name} (is: ${is})`)}localizationCache.set(constructor,promise)}return promise}/** @type {Map<Function, Promise<LocalizationJson | false>>} */const localizationCache=new Map;/**
+ */function loadLocalization(constructor){let promise=localizationCache.get(constructor);if(!promise){const temp=/** @type {any} */constructor,is=temp.is,meta=temp.importMeta,noDefaultLocalization=!!temp.noDefaultLocalization;/** @type {string} */if(meta&&meta.url&&is){const currentLang=_netspeakNavigator.NetspeakNavigator.currentLanguage;if(!noDefaultLocalization&&currentLang==_netspeakNavigator.NetspeakNavigator.defaultLanguage){promise=Promise.resolve(!1)}else{const url=new URL(meta.url);url.hash=url.search="";const dir=url.pathname.replace(/\/[^/]*$/,"");url.pathname=`${dir}/locales/${is}.${currentLang}.json`;promise=fetch(url.href).then(resp=>resp.json())}}else if(!is){promise=Promise.reject(`No 'is' property on ${constructor.name}`)}else{promise=Promise.reject(`No 'importMeta' property on ${constructor.name} (is: ${is})`)}localizationCache.set(constructor,promise)}return promise}/** @type {Map<Function, Promise<LocalizationJson | false>>} */const localizationCache=new Map;/**
  * A localizable element with support for PrismJS.
  */class NetspeakElement extends _polymerElement.PolymerElement{constructor(){super();// this is the latest we want to preload the localization
 loadLocalization(this.constructor)}/**
@@ -49,7 +49,7 @@ console.warn(`There is no key '${key}' in the localization.`)}}return defaultVal
 	 *
 	 * This will not affect elements which are highlighted already.
 	 * If Prism is not defined, then this method will do nothing.
-	 */styleCode(){highlightCode(this.shadowRoot)}}/**
+	 */styleCode(){if(this.shadowRoot){highlightCode(this.shadowRoot)}}}/**
  * Highlights all code elements which follow the PrismJS language-xxxx convention.
  *
  * This will not affect elements which are highlighted already.
