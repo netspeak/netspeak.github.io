@@ -1,18 +1,18 @@
 define(["exports","./jsonp.js"],function(_exports,_jsonp){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.normalizeQuery=normalizeQuery;_exports.PhraseCollection=_exports.Phrase=_exports.Word=_exports.Netspeak=void 0;/**
  * Normalizes the given query such that two identical queries have the same string representation.
  *
- * @param {string} query
+ * @param {string | undefined | null} query
  * @returns {string}
  */function normalizeQuery(query){// special values
 if(!query)return"";// normalize white spaces
-return query.replace(/[\s\uFEFF\xA0]+/g," ").replace(/^ | $/g,"")}/**
+return query.replace(/[\s\uFEFF\xA0]+/g," ").trim()}/**
  * @typedef Corpus
  * @property {string} key The unique key (or id) of the corpus.
  * @property {string} name The english name of the corpus.
  * @property {string} [language] The ISO 639-1 name of the language of the corpus. Only available for Netspeak >= 4.
  */ /**
  * @typedef CorporaInfo
- * @property {string} default The key of the default corpus.
+ * @property {string | undefined} default The key of the default corpus.
  * @property {Corpus[]} corpora
  */ /**
  * @typedef NetspeakSearchRequest
@@ -29,7 +29,10 @@ return query.replace(/[\s\uFEFF\xA0]+/g," ").replace(/^ | $/g,"")}/**
  * @property {boolean} [checkComplete=false] Whether the completeness of the resulting phrases should be explicitly checked. This cannot be done if `topk` is set to its maximum allowed value.
  * @property {"default" | "fill"} [topkMode="default"] If the top-k mode is `"fill"`, then the API will guarantee that there are no further phrases if less than k phrases were returned. The fill mode requires that `request.topk` is set and that `options.outputType` is not `"raw"`. This might result in multiple request being made.
  */ /**
- * @typedef {Phrase[] & { complete?: boolean }} NetspeakSearchResult
+ * @typedef NetspeakSearchResult
+ * @property {Phrase[]} phrases The phrases returned by the API.
+ * @property {boolean | undefined} [complete]
+ * @property {string[]} unknownWords A list of unknown words returned by the API.
  */class Netspeak{/**
 	 * Creates an instance of Netspeak.
 	 */constructor(){this.baseUrl=Netspeak.defaultBaseUrl;this.defaultCorpus=Netspeak.defaultCorpus;this.corpusCaching=!0;/**
@@ -42,12 +45,12 @@ return query.replace(/[\s\uFEFF\xA0]+/g," ").replace(/^ | $/g,"")}/**
 	 * It indicates whether the phrase array is complete, so that no additional phrases can be obtained by increasing `topk` or deceasing `maxfreq`.
 	 * If the value is not set or `undefined`, it is not certain whether there are still phrases matching the query.
 	 *
-	 * @param {NetspeakSearchRequest} request A request specifying the the options of the Netspeak API.
-	 * @param {NetspeakSearchOptions} [options]
+	 * @param {Readonly<NetspeakSearchRequest>} request A request specifying the the options of the Netspeak API.
+	 * @param {Readonly<NetspeakSearchOptions>} [options]
 	 * @returns {Promise<NetspeakSearchResult>}
-	 */search(request,options={}){options=Object.assign({},options);// fill mode
-if("fill"===options.topkMode){return this._fillSearch(request,options)}try{// copy request
-const req=Object.assign({},request);// configure request
+	 */search(request,options){const opts=/** @type {NetspeakSearchOptions} */Object.assign({},options);// fill mode
+if("fill"===opts.topkMode){return this._fillSearch(request,opts)}try{// copy request
+const req=/** @type {NetspeakSearchRequest} */Object.assign({},request);// configure request
 req.format="json";if(!req.corpus){req.corpus=this.defaultCorpus}// get URL
 const url=this.getSearchUrl(req,this.baseUrl);return(0,_jsonp.jsonp)(url).then(json=>{const query=req.query,corpus=req.corpus;// for information on how the JSON object is structured see www.netspeak.org
 if(json[9]){// json["9"]:  error code for any value != 0
@@ -64,7 +67,7 @@ throw`NetspeakError: ${json[9]}: ${json[10]}`}// json["4"]: [ // array of phrase
 //         ]
 //     }, ...
 // ];
-/** @type {{ '1': number, '2': number, '3': { '1': number, '2': string }[] }[]} */const rawPhrases=json[4]||[],phrases=rawPhrases.map(phrase=>{const words=phrase[3].map(w=>new Word(w[2],w[1]));return new Phrase(words,phrase[2],query,corpus)});return phrases})}catch(error){return Promise.reject(error)}}/**
+/** @type {{ '1': number, '2': number, '3': { '1': number, '2': string }[] }[]} */const rawPhrases=json[4]||[],phrases=rawPhrases.map(phrase=>{const words=phrase[3].map(w=>new Word(w[2],w[1]));return new Phrase(words,phrase[2],query,corpus)}),unknownWords=json[5]||[];return{phrases,unknownWords}})}catch(error){return Promise.reject(error)}}/**
 	 * Queries phrases from the Netspeak API using the given request.
 	 *
 	 * This version of search guarantees that if not request.topk phrases are returned that there are no further phrases.
@@ -72,24 +75,20 @@ throw`NetspeakError: ${json[9]}: ${json[10]}`}// json["4"]: [ // array of phrase
 	 * To guarantees this, there might be as much as request.topk requests to the Netspeak API.
 	 *
 	 * @private
-	 * @param {NetspeakSearchRequest} request A request specifying the the options of the Netspeak API.
+	 * @param {Readonly<NetspeakSearchRequest>} request A request specifying the the options of the Netspeak API.
 	 * @param {NetspeakSearchOptions} options
 	 * @returns {Promise<NetspeakSearchResult>}
 	 */_fillSearch(request,options){// copy request
-const req=Object.assign({},request);try{// check topk
+const req=/** @type {NetspeakSearchRequest} */Object.assign({},request);try{// check topk
 if("number"!==typeof req.topk){throw new TypeError("request.topk has to be a number.")}// prepare
-delete options.topkMode;const goal=req.topk,totalPhrases=/** @type {Phrase[] & { complete: boolean }} */[];totalPhrases.complete=!1;/**
-			 * A "recursive" function to continue loading phrases until a certain number of phases has been loaded or
-			 * there are no more phrases left.
-			 *
-			 * @returns {Promise<Phrase[] & { complete: boolean }>}
-			 */const fill=()=>{req.topk=goal-totalPhrases.length+1;// + 1 to check for completeness
-return this.search(req,options).then(phrases=>{// append new phrases
-totalPhrases.splice(phrases.length,0,...phrases);// no new phrases
-if(0===phrases.length){totalPhrases.complete=!0;return totalPhrases}// queried more than necessary -> done & incomplete
-if(totalPhrases.length>goal){totalPhrases.complete=!1;totalPhrases.splice(goal,goal-totalPhrases.length);return totalPhrases}// there are still phrases left to query
+delete options.topkMode;const goal=req.topk,result={phrases:[],complete:!1,unknownWords:[]},unknownWordsSet={},fill=()=>{req.topk=goal-result.phrases.length+1;// + 1 to check for completeness
+return this.search(req,options).then(({phrases,unknownWords})=>{// append new phrases
+result.phrases.push(...phrases);// add new unknown words
+unknownWords.forEach(word=>{if(!unknownWordsSet[word]){unknownWordsSet[word]=!0;unknownWords.push(word)}});// no new phrases
+if(0===phrases.length){result.complete=!0;return result}// queried more than necessary -> done & incomplete
+if(result.phrases.length>goal){result.complete=!1;result.phrases.splice(goal,goal-result.phrases.length);return result}// there are still phrases left to query
 // adjust maxFreq
-const newMaxFreq=phrases[phrases.length-1].frequency;request.maxfreq=request.maxfreq===newMaxFreq?newMaxFreq-1:newMaxFreq;return fill()})};return fill()}catch(error){return Promise.reject(error)}}/**
+const newMaxFreq=phrases[phrases.length-1].frequency;req.maxfreq=req.maxfreq===newMaxFreq?newMaxFreq-1:newMaxFreq;return fill()})};/** @type {NetspeakSearchResult & { complete: boolean }} */return fill()}catch(error){return Promise.reject(error)}}/**
 	 * Returns the search URL for the Netspeak API with the given request.
 	 *
 	 * @param {NetspeakSearchRequest} request The request for the Netspeak API.

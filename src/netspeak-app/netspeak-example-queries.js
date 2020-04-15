@@ -15,8 +15,6 @@ order:"{ rum richtig }",gap:"M?t ? L\xFC...e"}},defaultCorpus="web-en";/**
 
 			#info {
 				background-color: #F8F8F8;
-				border: 1px var(--border-color);
-				border-style: none var(--left-right-border-style) solid var(--left-right-border-style);
 				clear: both;
 				position: relative;
 				padding: .5em 1em;
@@ -111,8 +109,11 @@ order:"{ rum richtig }",gap:"M?t ? L\xFC...e"}},defaultCorpus="web-en";/**
 		 * @type {number}
 		 */this.clickCounter=0}/**
 	 * The method called after the element was added to the DOM.
-	 */connectedCallback(){super.connectedCallback();this._renderExamples()}_renderExamples(){if(!this.isConnected)return;if(!this._localization)return;const examples=exampleQueries[this.corpus]||exampleQueries[defaultCorpus],table=this.shadowRoot.querySelector("table");table.innerHTML="";// @ts-ignore
-const highlight=code=>Prism.highlight(code,Prism.languages["netspeak-query"],"netspeak-query");for(const exampleKey in examples){const query=examples[exampleKey],tr=table.appendChild(document.createElement("tr"));tr.innerHTML=`
+	 */connectedCallback(){super.connectedCallback();this._renderExamples()}_renderExamples(){if(!this.isConnected)return;if(!this._localization)return;const examples=exampleQueries[this.corpus]||exampleQueries[defaultCorpus],table=this.shadowRoot.querySelector("table");table.innerHTML="";/**
+		 * @param {string} code
+		 * @returns {string}
+		 */function highlight(code){// @ts-ignore
+return Prism.highlight(code,Prism.languages["netspeak-query"],"netspeak-query")}for(const exampleKey in examples){const query=examples[exampleKey],tr=table.appendChild(document.createElement("tr"));tr.innerHTML=`
 				<td class="example"><span>${highlight(query)}</span></td>
 				<td class="spacer"></td>
 				<td class="explanation">${highlight(this._localization[exampleKey])}</td>
