@@ -325,27 +325,32 @@ return}if(this._inputBlurred){// blurred
 return}this._focusInput=!0;if(query!=this.query){this.query=query}else{this.queryPhrases()}},1)}_queryInputKeyUp(e){if(this.slowSearch||this.readonly)return;const newQuery=e.target.value;if((0,_netspeak.normalizeQuery)(newQuery)===(0,_netspeak.normalizeQuery)(this.query))return;this._focusInput=!0;this.query=newQuery;this._addToHistory({query:newQuery,corpus:this.corpus},!0)}/**
 	 * Queries phrases using the Netspeak API adding them to or overwriting the phrases queried before.
 	 *
-	 * @param {QueryPhrasesOptions} [options={}]
-	 */queryPhrases(options={}){this._queryCount++;const searchOptions=options.searchOptions||{},request={query:this.query,corpus:this.corpus,focusInput:!!options.focusInput};// request
-// add to history
-if(request.query&&request.corpus)this._addToHistory({query:request.query,corpus:request.corpus},!0);const addToRequest=(prop,defaultValue=void 0)=>{if(options[prop]!=void 0)request[prop]=options[prop];else if(defaultValue!==void 0)request[prop]=defaultValue};addToRequest("topk",this.initialLimit);addToRequest("maxfreq");// a more expensive search for the first query
-if(!this._hadFirstQuery){this._hadFirstQuery=!0;if(!("topkMode"in searchOptions)){searchOptions.topkMode="fill"}}const append="append"==options.appendMode;let searchResult;if(!(0,_netspeak.normalizeQuery)(request.query)){// note that this optimization will also catch the first empty query from the polymer query change event.
-searchResult=Promise.resolve(/** @type {import("./netspeak").NetspeakSearchResult} */{phrases:[],unknownWords:[]})}else{searchResult=this.netspeakApi.search(request,searchOptions)}searchResult.then(result=>{this._onSearchSuccess(result,request,append)}).catch(reason=>{this._onSearchError(reason,request,append)})}/**
+	 * @param {Readonly<QueryPhrasesOptions>} [options={}]
 	 *
+	 * @typedef QueryPhrasesState
+	 * @property {string} query
+	 * @property {string} corpus
+	 * @property {boolean} focusInput
+	 * @property {import("./netspeak").NetspeakSearchRequest} [request]
+	 */queryPhrases(options={}){this._queryCount++;/** @type {QueryPhrasesState} */const state={query:this.query,corpus:this.corpus,focusInput:!!this._focusInput},query=(0,_netspeak.normalizeQuery)(this.query),corpus=this.corpus;/** @type {Promise<import("./netspeak.js").NetspeakSearchResult>} */let searchResult;if(!query||!corpus){// this optimization will also catch the first empty query from the polymer query change event.
+searchResult=Promise.resolve({phrases:[],unknownWords:[]})}else{// add to history
+this._addToHistory({query,corpus},!0);/** @type {import("./netspeak").NetspeakSearchRequest} */const request={// TODO: find a better way to lowercase queries
+// TODO: remove this hack
+query:"web-en"===corpus?query.toLowerCase():query,corpus};state.request=request;const addToRequest=(prop,defaultValue=void 0)=>{if(options[prop]!=void 0)request[prop]=options[prop];else if(defaultValue!==void 0)request[prop]=defaultValue};addToRequest("topk",this.initialLimit);addToRequest("maxfreq");const searchOptions=options.searchOptions||{};// a more expensive search for the first query
+if(!this._hadFirstQuery){this._hadFirstQuery=!0;if(!("topkMode"in searchOptions)){searchOptions.topkMode="fill"}}searchResult=this.netspeakApi.search(request,searchOptions)}const append="append"==options.appendMode;searchResult.then(result=>{this._onSearchSuccess(result,state,append)}).catch(reason=>{this._onSearchError(reason,state,append)})}/**
 	 * @param {import("./netspeak").NetspeakSearchResult} result
-	 * @param {{ query: string, corpus: string, focusInput: boolean }} request
+	 * @param {QueryPhrasesState} state
 	 * @param {boolean} append
-	 */_onSearchSuccess(result,request,append=!1){if(this.query!==request.query)return;// too late
-let newPhrases=result.phrases.length;/** @type {string[]} */this.unknownWords=result.unknownWords;this.errorMessage="";if(append){newPhrases=this._queriedPhrases.addAll(result.phrases)}else{this._queriedPhrases=_netspeak.PhraseCollection.from(result.phrases)}this._resultList.showLoadMore=!result.complete&&0<newPhrases;this.update(request.focusInput)}/**
-	 *
+	 */_onSearchSuccess(result,state,append=!1){if(this.query!==state.query||this.corpus!==state.corpus)return;// too late
+let newPhrases=result.phrases.length;/** @type {string[]} */this.unknownWords=result.unknownWords;this.errorMessage="";if(append){newPhrases=this._queriedPhrases.addAll(result.phrases)}else{this._queriedPhrases=_netspeak.PhraseCollection.from(result.phrases)}this._resultList.showLoadMore=!result.complete&&0<newPhrases;this.update(state.focusInput)}/**
 	 * @param {string | Error} message
-	 * @param {{ query: string, corpus: string, focusInput: boolean }} request
+	 * @param {QueryPhrasesState} state
 	 * @param {boolean} append
 	 * @param {number} delay
-	 */_onSearchError(message,request,append=!1,delay=1e3){if(this.query!==request.query)return;// too late
+	 */_onSearchError(message,state,append=!1,delay=1e3){if(this.query!==state.query||this.corpus!==state.corpus)return;// too late
 // delay
-if(0<delay){setTimeout(()=>this._onSearchError(message,request,append,0),delay);return}// disable load more
-this._resultList.showLoadMore=!1;console.error(message,request);this.errorMessage=message;this.unknownWords=[];this.update(request.focusInput)}update(focusInput=!1){// declare variables
+if(0<delay){setTimeout(()=>this._onSearchError(message,state,append,0),delay);return}// disable load more
+this._resultList.showLoadMore=!1;console.error(message,state);this.errorMessage=message;this.unknownWords=[];this.update(state.focusInput)}update(focusInput=!1){// declare variables
 const queriedPhrases=this.queriedPhrases;this._resultList.phrases=queriedPhrases.toArray();// wrapper
 /** @type {HTMLDivElement} */const wrapper=this.shadowRoot.querySelector("#result-wrapper"),warnings=this.shadowRoot.querySelector("#warnings");// output unknown words
 /** @type {HTMLElement} */this.unknownWords=(this.unknownWords||[]).filter(Boolean);if(0<this.unknownWords.length){warnings.style.display=null;this._updateWarnings(warnings,this.unknownWords)}else{warnings.style.display="none"}// output errors
@@ -355,17 +360,13 @@ wrapper.style.display=!this._resultList.isEmpty?"block":"none"}// show "no phras
 if(0===this._resultList.phrases.length&&!this._resultList.showLoadMore&&this.query){this._noPhraseFoundContainer.style.display=null}else{this._noPhraseFoundContainer.style.display="none"}if(focusInput&&this._queryInputElement){this._queryInputElement.focus()}}/**
 	 * @param {HTMLElement} container
 	 * @param {readonly string[]} unknownWords Must be non-empty
-	 */_updateWarnings(container,unknownWords){container.innerHTML="";this.localMessage("unknown-word","Unknown word ${word}.").then(unknownWordMessage=>{unknownWordMessage=(0,_util.encode)(unknownWordMessage);unknownWords.forEach(word=>{const p=(0,_util.appendNewElements)(container,"P");p.innerHTML=unknownWordMessage.replace(/\$\{word\}/g,()=>{return`<em>${word}</em>`});// TODO: Add REAL support for suggestion for all-lower-case indexes.
-const lower=word.toLowerCase();if("web-en"===this.corpus&&word!==lower){const WORD_BOUNDARY=/^[|[\]{}\s]$/;let suggestion=this.query,startIndex=0;// replace all occurrences
-while(startIndex<suggestion.length){const index=suggestion.indexOf(word,startIndex);if(-1===index)break;// check boundaries
-const before=suggestion[index-1],after=suggestion[index+word.length];if(before&&!WORD_BOUNDARY.test(before)||after&&!WORD_BOUNDARY.test(after)){startIndex=index+word.length;continue}suggestion=suggestion.slice(0,index)+lower+suggestion.slice(index+word.length);startIndex=index+lower.length}this.localMessage("did-you-mean","Did you mean ${word}?").then(didYouMeanMessage=>{p.appendChild(document.createTextNode(" "));didYouMeanMessage.split(/\$\{word\}/g).forEach((segment,i)=>{if(0<i){const span=(0,_util.appendNewElements)(p,"em","span");span.className="suggestion";span.textContent=lower;span.addEventListener("click",()=>{this.query=suggestion})}p.appendChild(document.createTextNode(segment))})})}})})}/**
+	 */_updateWarnings(container,unknownWords){container.innerHTML="";this.localMessage("unknown-word","Unknown word ${word}.").then(unknownWordMessage=>{unknownWordMessage=(0,_util.encode)(unknownWordMessage);unknownWords.forEach(word=>{const p=(0,_util.appendNewElements)(container,"P");p.innerHTML=unknownWordMessage.replace(/\$\{word\}/g,()=>{return`<em>${word}</em>`})})})}/**
 	 * @param {HTMLElement} container
 	 * @param {string | Error} details
-	 */_updateErrorMessage(container,details){container.innerHTML="";Promise.all([this.localMessage("invalid-query",`Your input cannot be processed because it does not follow the Netspeak query syntax.
-					Please correct your input.
-					<br><br>
-					More information about the Netpspeak query syntax can be found
-					<a href="https://netspeak.org/help.html#how" target="_blank">here</a>.`),this.localMessage("full-details","Full details")]).then(([invalidQuery,fullDetails])=>{(0,_util.appendNewElements)(container,"P").innerHTML=`${invalidQuery}
+	 */_updateErrorMessage(container,details){container.innerHTML="";Promise.all([this.localMessage("invalid-query",`Your input is not a valid Netspeak query.
+				<br><br>
+				More information about the Netpspeak query syntax can be found
+				<a href="https://netspeak.org/help.html#how" target="_blank">here</a>.`),this.localMessage("full-details","Full details")]).then(([invalidQuery,fullDetails])=>{(0,_util.appendNewElements)(container,"P").innerHTML=`${invalidQuery}
 				<br>
 				<br>
 				<details><summary>${(0,_util.encode)(fullDetails)}</summary>

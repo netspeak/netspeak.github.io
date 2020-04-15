@@ -1,7 +1,7 @@
 define(["exports","./jsonp.js"],function(_exports,_jsonp){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.normalizeQuery=normalizeQuery;_exports.PhraseCollection=_exports.Phrase=_exports.Word=_exports.Netspeak=void 0;/**
  * Normalizes the given query such that two identical queries have the same string representation.
  *
- * @param {string} query
+ * @param {string | undefined | null} query
  * @returns {string}
  */function normalizeQuery(query){// special values
 if(!query)return"";// normalize white spaces
