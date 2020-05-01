@@ -1,4 +1,4 @@
-define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.jsonp=jsonp;let idCounter=0;/**
+define(["exports"],function(_exports){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.jsonp=jsonp;_exports.TimeoutError=_exports.NetworkError=void 0;let idCounter=0;/**
  * Queries the JSON result for the given URL.
  *
  * The given URL is not allowed to contain a `callback` parameter.
@@ -15,6 +15,6 @@ window.clearTimeout(timeoutId);// remove callback
 delete window[id];// remove script
 let script=document.getElementById(id);if(script)script.remove()};// id
 let id="jsonp$$"+idCounter++,timeoutId;// callbacks
-const callbackSuccess=json=>{removeCallback(id,timeoutId);resolve(json)},callbackError=message=>{removeCallback(id,timeoutId);reject(message)},prefix=-1===url.indexOf("?")?"?":"&";url+=prefix+"callback="+encodeURIComponent(addCallback(id,callbackSuccess));// set timeout
-timeoutId=window.setTimeout(()=>callbackError(`TimeoutError for ${url}`),timeout);// create script
-let script=document.createElement("SCRIPT");script.id=id;script.onerror=()=>callbackError(`Unknow error for ${url}`);script.setAttribute("async","true");script.setAttribute("src",url);document.body.appendChild(script)}catch(error){reject(error)}})}});
+/** @param {any} json */const callbackSuccess=json=>{removeCallback(id,timeoutId);resolve(json)},callbackError=message=>{removeCallback(id,timeoutId);reject(message)},prefix=-1===url.indexOf("?")?"?":"&";/** @param {NetworkError} message */url+=prefix+"callback="+encodeURIComponent(addCallback(id,callbackSuccess));// set timeout
+timeoutId=window.setTimeout(()=>{callbackError(new TimeoutError(`Could not reach server after ${timeout/1e3} seconds for ${url}`))},timeout);// create script
+let script=document.createElement("SCRIPT");script.id=id;script.onerror=()=>callbackError(new NetworkError(`Unknown networking error for ${url}`));script.setAttribute("async","true");script.setAttribute("src",url);document.body.appendChild(script)}catch(error){reject(error)}})}class NetworkError extends Error{}_exports.NetworkError=NetworkError;class TimeoutError extends NetworkError{}_exports.TimeoutError=TimeoutError});

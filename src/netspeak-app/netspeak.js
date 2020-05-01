@@ -1,4 +1,4 @@
-define(["exports","./jsonp.js"],function(_exports,_jsonp){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.normalizeQuery=normalizeQuery;_exports.PhraseCollection=_exports.Phrase=_exports.Word=_exports.Netspeak=void 0;/**
+define(["exports","./jsonp.js"],function(_exports,_jsonp){"use strict";Object.defineProperty(_exports,"__esModule",{value:!0});_exports.normalizeQuery=normalizeQuery;_exports.PhraseCollection=_exports.Phrase=_exports.Word=_exports.NetspeakInvalidQueryError=_exports.NetspeakError=_exports.Netspeak=void 0;/**
  * Normalizes the given query such that two identical queries have the same string representation.
  *
  * @param {string | undefined | null} query
@@ -52,10 +52,9 @@ return query.replace(/[\s\uFEFF\xA0]+/g," ").trim()}/**
 if("fill"===opts.topkMode){return this._fillSearch(request,opts)}try{// copy request
 const req=/** @type {NetspeakSearchRequest} */Object.assign({},request);// configure request
 req.format="json";if(!req.corpus){req.corpus=this.defaultCorpus}// get URL
-const url=this.getSearchUrl(req,this.baseUrl);return(0,_jsonp.jsonp)(url).then(json=>{const query=req.query,corpus=req.corpus;// for information on how the JSON object is structured see www.netspeak.org
-if(json[9]){// json["9"]:  error code for any value != 0
+const url=this.getSearchUrl(req,this.baseUrl);return(0,_jsonp.jsonp)(url).then(json=>{const query=req.query,corpus=req.corpus,errorCode=json[9];if(errorCode){// json["9"]:  error code for any value != 0
 // json["10"]: error message
-throw`NetspeakError: ${json[9]}: ${json[10]}`}// json["4"]: [ // array of phrases
+const errorMessage=json[10];if(1==errorCode){throw new NetspeakInvalidQueryError(errorMessage)}else{throw new NetspeakError(errorCode,errorMessage)}}// json["4"]: [ // array of phrases
 //     {
 //         "1": internal id (int),
 //         "2": absolute frequency (int),
@@ -115,7 +114,12 @@ if(corpus.isDefault&&corpora.default===void 0)corpora.default=corpus.key;delete 
 	 * @type {string}
 	 */static get defaultCorpus(){return"web-en"}/**
 	 * @returns {Netspeak}
-	 */static getInstance(){return defaultNetspeakInstance=defaultNetspeakInstance||new Netspeak}}_exports.Netspeak=Netspeak;let defaultNetspeakInstance;class Word{/**
+	 */static getInstance(){return defaultNetspeakInstance=defaultNetspeakInstance||new Netspeak}}_exports.Netspeak=Netspeak;let defaultNetspeakInstance;class NetspeakError extends Error{/**
+	 * @param {number | string} errorCode
+	 * @param {string} message
+	 */constructor(errorCode,message){super("Netspeak error: "+errorCode+": "+message)}}_exports.NetspeakError=NetspeakError;class NetspeakInvalidQueryError extends NetspeakError{/**
+	 * @param {string} message
+	 */constructor(message){super(1,"Invalid Query: "+message)}}_exports.NetspeakInvalidQueryError=NetspeakInvalidQueryError;class Word{/**
 	 * @param {string} text The text of the word.
 	 * @param {number} [type=Word.Types.WORD] The type of operator the word matches.
 	 */constructor(text,type=Word.Types.WORD){this.text=text;this.type=type}/**
