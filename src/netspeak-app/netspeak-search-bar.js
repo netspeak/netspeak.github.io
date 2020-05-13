@@ -141,10 +141,16 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./
 				font-size: 1em;
 			}
 
-			#drop-down .option {
+			#drop-down .option,
+			#drop-down .status {
 				padding: .5em 1em;
 				border-bottom: 1px solid var(--border-color);
 				cursor: pointer;
+			}
+
+			#drop-down .status {
+				font-style: italic;
+				cursor: unset;
 			}
 
 			#drop-down .option:nth-child(2n) {
@@ -155,7 +161,8 @@ define(["exports","meta","./netspeak-element.js","./netspeak.js","./util.js","./
 				background-color: #EEE;
 			}
 
-			#drop-down .option:last-child {
+			#drop-down .option:last-child,
+			#drop-down .status:last-child {
 				border-bottom: none;
 			}
 
@@ -365,7 +372,7 @@ if(0===this._resultList.phrases.length&&!this._resultList.showLoadMore&&this.que
 	 * @param {string | Error} details
 	 */_updateErrorMessage(container,details){container.innerHTML="";/** @type {Promise<string>} */let message;if(details instanceof _netspeak.NetspeakInvalidQueryError){message=this.localMessage("invalid-query-error",`Your input is not a valid Netspeak query.
 				<br><br>
-				More information about the Netpspeak query syntax can be found
+				More information about the Netspeak query syntax can be found
 				<a href="https://netspeak.org/help.html#how" target="_blank">here</a>.`)}else if(details instanceof _netspeak.NetspeakError){// we got an error from the server which isn't a query error. This means that the user is not at fault
 // but can't really say anything about what went wrong because the Netspeak server might have failed for
 // any number of reasons.
@@ -386,7 +393,7 @@ if(this.queriedPhrases&&0<this.queriedPhrases.length){options.maxfreq=this.queri
 if(copy.query!==void 0&&null!==copy.query){if(""===copy.query)return;if(!(0,_netspeak.normalizeQuery)(copy.query))return}if(!copy.query)throw Error("item.query has to be defined");if(!copy.corpus)throw Error("item.corpus has to be defined");copy.query=copy.query.trim();const history=this.history;// remove less recent entries
 for(let i=history.length-1;0<=i;i--){const it=history[i];if(!it||it.query==copy.query&&it.corpus==copy.corpus){history.splice(i,1)}}history.push(copy)}_historyHiddenChanged(newValue){if(!this._historyButton)return;this._historyButton.parentElement.style.display=newValue?"none":null}_historyButtonClick(){this._toggleHistoryDropDown()}_toggleHistoryDropDown(show=void 0){if(this.historyHidden||!this._historyButton)return;const container=this._historyButton.parentElement;if(show===void 0)show=!container.hasAttribute("history-visible");if(show){container.setAttribute("history-visible","");// current history
 const history=this.history.filter(i=>i.corpus===this.corpus).reverse(),historyLimit=10;if(history.length>historyLimit)history.splice(historyLimit,history.length-historyLimit);const positioner=(0,_util.appendNewElements)(container,"DIV#drop-down-positioner");positioner.style.paddingLeft=this._historyButton.clientWidth+"px";const dd=(0,_util.appendNewElements)(positioner,"BUTTON#drop-down");dd.onblur=()=>{container.removeAttribute("history-visible");dd.parentElement.remove()};// new option function
-const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.innerHTML=query;opt.onclick=()=>{this._toggleHistoryDropDown(!1);this.query=query}};history.forEach(i=>newOpt(i.query));if(0==history.length)newOpt("");dd.focus()}else{container.removeAttribute("history-visible");// @ts-ignore
+const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.innerHTML=query;opt.onclick=()=>{this._toggleHistoryDropDown(!1);this.query=query}};history.forEach(i=>newOpt(i.query));if(0==history.length){const opt=(0,_util.appendNewElements)(dd,"DIV.status");this.localMessage("no-history","No query history").then(msg=>{opt.textContent=msg})}dd.focus()}else{container.removeAttribute("history-visible");// @ts-ignore
 container.querySelector("#drop-down").blur()}}}/**
  * The result list of the Netspeak search bar.
  *
@@ -613,13 +620,14 @@ container.querySelector("#drop-down").blur()}}}/**
 				width: 100%;
 			}
 
-			#load-more-button:hover {
+			#load-more-button:hover,
+			#load-more-button[disabled] {
 				background-color: #EEE;
 			}
 
 			/* These are for both the result list load-more button and the examples load-more buttons */
 
-			*:hover>span.load-more-img {
+			*:hover:not([disabled]) > span.load-more-img {
 				opacity: 1;
 			}
 			span.load-more-img {
@@ -642,7 +650,8 @@ container.querySelector("#drop-down").blur()}}}/**
 		<button id="load-more-button" style="display: none;">
 			<span class="load-more-img"></span>
 		</button>
-		`}get isEmpty(){return 0===this.pinnedPhrases.size+this.phrases.length}constructor(){super();this.showLoadMore=!1;this.examplePageSize=6;/** @type {Phrase[]} */this.phrases=[];/** @type {Map<string, Phrase>} */this.pinnedPhrases=new Map;this.snippets=_snippets.DEFAULT_SNIPPETS;this.formatter=PhraseFormatter.getInstance();this.invalidate=(0,_util.createNextFrameInvoker)(()=>this._render());this.addEventListener("phrases-changed",()=>this.invalidate());this.addEventListener("formatter-changed",()=>this.invalidate())}connectedCallback(){super.connectedCallback();/** @type {HTMLElement} */this._resultList=this.shadowRoot.querySelector("#result-list");/** @type {HTMLElement} */this._loadMore=this.shadowRoot.querySelector("#load-more-button");this.addEventListener("show-load-more-changed",()=>{if(this._loadMore){this._loadMore.style.display=this.showLoadMore?"block":"none"}});this._loadMore.addEventListener("click",()=>{this.dispatchEvent(new CustomEvent("load-more",{bubbles:!1,cancelable:!1}))})}clear(){this.phrases=[];this.pinnedPhrases.clear();this.showLoadMore=!1;this.invalidate()}_render(){if(!this.isConnected)return;const collection=new NewPhraseCollection(this._getAllPhrasesToRender()),existingElementPhraseIdsSet=new Set;// update or delete current DOM elements
+		`}get isEmpty(){return 0===this.pinnedPhrases.size+this.phrases.length}constructor(){super();this.showLoadMore=!1;this.examplePageSize=6;/** @type {Phrase[]} */this.phrases=[];/** @type {Map<string, Phrase>} */this.pinnedPhrases=new Map;this.snippets=_snippets.DEFAULT_SNIPPETS;this.formatter=PhraseFormatter.getInstance();this.invalidate=(0,_util.createNextFrameInvoker)(()=>this._render());this.addEventListener("phrases-changed",()=>this.invalidate());this.addEventListener("formatter-changed",()=>this.invalidate())}connectedCallback(){super.connectedCallback();/** @type {HTMLElement} */this._resultList=this.shadowRoot.querySelector("#result-list");/** @type {HTMLElement} */this._loadMore=this.shadowRoot.querySelector("#load-more-button");this.addEventListener("show-load-more-changed",()=>{if(this._loadMore){this._loadMore.style.display=this.showLoadMore?"block":"none";this._loadMore.removeAttribute("disabled")}});this._loadMore.addEventListener("click",()=>{this._loadMore.setAttribute("disabled","");this.dispatchEvent(new CustomEvent("load-more",{bubbles:!1,cancelable:!1}))})}clear(){this.phrases=[];this.pinnedPhrases.clear();this.showLoadMore=!1;this.invalidate()}_render(){if(!this.isConnected)return;// re-enable load more button
+this._loadMore.removeAttribute("disabled");const collection=new NewPhraseCollection(this._getAllPhrasesToRender()),existingElementPhraseIdsSet=new Set;// update or delete current DOM elements
 for(let i=this._resultList.children.length-1;0<=i;i--){const element=/** @type {HTMLElement} */this._resultList.children[i],elementPhrase=this._getResultElementPhrase(element);if(!elementPhrase){// delete
 element.remove();continue}const mapEntry=collection.byId(elementPhrase.id);if(mapEntry){// update
 existingElementPhraseIdsSet.add(elementPhrase.id);this._setResultElementPinned(element,elementPhrase);this._setResultElementStats(element,elementPhrase,collection)}else{// delete
