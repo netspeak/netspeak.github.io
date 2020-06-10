@@ -393,7 +393,7 @@ if(this.queriedPhrases&&0<this.queriedPhrases.length){options.maxfreq=this.queri
 if(copy.query!==void 0&&null!==copy.query){if(""===copy.query)return;if(!(0,_netspeak.normalizeQuery)(copy.query))return}if(!copy.query)throw Error("item.query has to be defined");if(!copy.corpus)throw Error("item.corpus has to be defined");copy.query=copy.query.trim();const history=this.history;// remove less recent entries
 for(let i=history.length-1;0<=i;i--){const it=history[i];if(!it||it.query==copy.query&&it.corpus==copy.corpus){history.splice(i,1)}}history.push(copy)}_historyHiddenChanged(newValue){if(!this._historyButton)return;this._historyButton.parentElement.style.display=newValue?"none":null}_historyButtonClick(){this._toggleHistoryDropDown()}_toggleHistoryDropDown(show=void 0){if(this.historyHidden||!this._historyButton)return;const container=this._historyButton.parentElement;if(show===void 0)show=!container.hasAttribute("history-visible");if(show){container.setAttribute("history-visible","");// current history
 const history=this.history.filter(i=>i.corpus===this.corpus).reverse(),historyLimit=10;if(history.length>historyLimit)history.splice(historyLimit,history.length-historyLimit);const positioner=(0,_util.appendNewElements)(container,"DIV#drop-down-positioner");positioner.style.paddingLeft=this._historyButton.clientWidth+"px";const dd=(0,_util.appendNewElements)(positioner,"BUTTON#drop-down");dd.onblur=()=>{container.removeAttribute("history-visible");dd.parentElement.remove()};// new option function
-const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.innerHTML=query;opt.onclick=()=>{this._toggleHistoryDropDown(!1);this.query=query}};history.forEach(i=>newOpt(i.query));if(0==history.length){const opt=(0,_util.appendNewElements)(dd,"DIV.status");this.localMessage("no-history","No query history").then(msg=>{opt.textContent=msg})}dd.focus()}else{container.removeAttribute("history-visible");// @ts-ignore
+const newOpt=query=>{const opt=(0,_util.appendNewElements)(dd,"DIV.option");opt.textContent=query;opt.onclick=()=>{this._toggleHistoryDropDown(!1);this.query=query}};history.forEach(i=>newOpt(i.query));if(0==history.length){const opt=(0,_util.appendNewElements)(dd,"DIV.status");this.localMessage("no-history","No query history").then(msg=>{opt.textContent=msg})}dd.focus()}else{container.removeAttribute("history-visible");// @ts-ignore
 container.querySelector("#drop-down").blur()}}}/**
  * The result list of the Netspeak search bar.
  *
@@ -444,9 +444,8 @@ container.querySelector("#drop-down").blur()}}}/**
 
 			#result-list .phrase-container {
 				background-repeat: no-repeat;
-				background-position-x: calc(100% + 1px);
-				background-position-y: -2px;
-				background-image: url("/src/img/frequency-bar.svg");
+				background-position: calc(100% + 1px) -2px;
+				background-image: url("/src/img/frequency-bar.png");
 
 				cursor: pointer;
 				padding: 0 var(--left-right-padding);

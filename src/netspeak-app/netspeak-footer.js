@@ -70,7 +70,7 @@ define(["meta","./netspeak-element.js","./netspeak-navigator.js"],function(meta,
 
 <div>
 	<div id="webis-copyright">
-		&copy; 2019 <a href="https://webis.de" target="_blank">Webis group</a>
+		&copy; 2019 <a href="https://webis.de" target="_blank">Webis Group</a>
 		<span class="bullet">&bullet;</span>
 		<a href="https://webis.de/people.html" target="_blank" id="contact">Contact</a>
 		<span class="bullet">&bullet;</span>
